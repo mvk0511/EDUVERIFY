@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - EduVerify Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="./static/js/chatbot.js" defer></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 font-sans flex h-screen overflow-hidden">
+
+    <!-- Left Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col transition-all hidden md:flex">
+        <div class="h-16 flex items-center px-6 text-white font-bold text-xl border-b border-slate-700">
+            <i class="fa-solid fa-graduation-cap text-emerald-400 mr-2"></i> EduVerify Admin
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+            <a href="#" onclick="showSection('dashboard')" id="nav-dashboard"
+                class="flex items-center px-6 py-3 bg-emerald-600 border-l-4 border-emerald-400 text-white transition-all nav-item"><i
+                    class="fa-solid fa-chart-pie w-6"></i> Dashboard</a>
+            <a href="#" onclick="showSection('students')" id="nav-students"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-users w-6"></i> Students List</a>
+            <a href="#" onclick="showSection('submissions')" id="nav-submissions"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-file-signature w-6"></i> Submission Reports</a>
+            <a href="#" onclick="showSection('schedule')" id="nav-schedule"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-calendar w-6"></i> Schedule</a>
+            <a href="#" onclick="showSection('timetable')" id="nav-timetable"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-clock w-6"></i> Timetable</a>
+        </nav>
+        <div class="p-4 border-t border-slate-700">
+            <a href="login.html" class="flex items-center px-2 py-2 hover:text-white transition-all text-red-400"><i
+                    class="fa-solid fa-arrow-right-from-bracket w-6"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10 shrink-0">
+            <div class="flex items-center bg-slate-100 rounded-full px-4 py-2 w-96 max-w-full">
+                <i class="fa-solid fa-search text-slate-400"></i>
+                <input type="text" id="teacherSearch" placeholder="Search students, submissions..."
+                    class="bg-transparent border-none outline-none ml-2 w-full text-sm"
+                    onkeyup="handleTeacherSearch(event)">
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative cursor-pointer hover:text-blue-600 transition-colors">
+                    <i class="fa-solid fa-bell text-xl text-slate-600"></i>
+                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                </div>
+                <div class="flex items-center gap-3 cursor-pointer group">
+                    <img src="https://ui-avatars.com/api/?name=Teacher+User&background=10B981&color=fff" alt="Profile"
+                        class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-emerald-500 transition-all">
+                    <div class="hidden sm:block">
+                        <p class="text-sm font-semibold">Prof. Teacher</p>
+                        <p class="text-xs text-slate-500">Computer Science Dept</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Dashboard Body -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-6">
+
+            <!-- Section 1: Dashboard Home -->
+            <div id="section-dashboard" class="space-y-6">
+                <div
+                    class="bg-emerald-600 text-white rounded-2xl p-8 relative overflow-hidden shadow-lg shadow-emerald-500/20">
+                    <i class="fa-solid fa-chalkboard-user absolute -right-10 -bottom-10 text-9xl text-white/10"></i>
+                    <h2 class="text-3xl font-bold mb-2">Teacher Admin Dashboard</h2>
+                    <p class="text-emerald-100 max-w-2xl text-lg mb-6">Monitor student submissions, evaluate plagiarism
+                        reports, and manage academic schedules with one unified interface.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-4">Plagiarism Breakdown
+                        </h4>
+                        <div class="h-64"><canvas id="pieChart"></canvas></div>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <h4 class="text-sm font-bold text-slate-500 uppercase tracking-wide mb-4">Submission Velocity
+                        </h4>
+                        <div class="h-64"><canvas id="barChart"></canvas></div>
+                    </div>
+                </div>
+
+                <!-- Create Assignment -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-xl font-bold mb-6">Create New Assignment</h3>
+                    <form class="grid grid-cols-1 md:grid-cols-2 gap-6"
+                        onsubmit="event.preventDefault(); alert('Assignment broadcasted to all students!')">
+                        <div class="space-y-4">
+                            <input type="text" placeholder="Assignment Title"
+                                class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                            <select class="w-full px-4 py-2 border rounded-lg outline-none">
+                                <option>Data Structures</option>
+                                <option>Web Development</option>
+                                <option>AI & Machine Learning</option>
+                            </select>
+                            <input type="date" class="w-full px-4 py-2 border rounded-lg outline-none">
+                        </div>
+                        <div class="space-y-4">
+                            <textarea placeholder="Instructions..."
+                                class="w-full px-4 py-2 border rounded-lg h-32 outline-none"></textarea>
+                            <button type="submit"
+                                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold transition-all shadow-md shadow-emerald-500/20">Broadcast
+                                Assignment</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Section 2: Students List -->
+            <div id="section-students" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6">Registered Students</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b">
+                                <tr class="text-slate-600 text-sm">
+                                    <th class="p-4 font-bold">Student Name</th>
+                                    <th class="p-4 font-bold">Email Address</th>
+                                    <th class="p-4 font-bold">Roll ID</th>
+                                    <th class="p-4 font-bold">Joined Date</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentListBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 3: Submission Reports -->
+            <div id="section-submissions" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold">Assignment Submission Reports</h2>
+                        <button onclick="exportToExcel()"
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all">
+                            <i class="fa-solid fa-file-excel"></i> Export All to Excel
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left" id="submissionsTable">
+                            <thead class="bg-slate-50 border-b">
+                                <tr class="text-slate-600 text-sm">
+                                    <th class="p-4 font-bold">Student</th>
+                                    <th class="p-4 font-bold">Assignment</th>
+                                    <th class="p-4 font-bold">Date</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold">Similarity Status</th>
+                                    <th class="p-4 font-bold">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissionReportsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 4: Schedule (Calendar) -->
+            <div id="section-schedule" class="hidden space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold mb-6">Class Schedule</h3>
+                        <div
+                            class="grid grid-cols-7 gap-2 mb-4 text-center font-bold text-slate-400 text-xs uppercase tracking-widest">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        <div id="calendarDays" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+                    </div>
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                        <h3 class="text-xl font-bold mb-4">Day Agenda</h3>
+                        <ul id="agendaList" class="space-y-4 text-slate-600 text-sm">
+                            <li class="p-3 bg-slate-50 rounded-lg italic">Select a date to view classes...</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 5: Timetable -->
+            <div id="section-timetable" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6">Staff Timetable</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b">
+                                <tr class="text-slate-600 text-sm">
+                                    <th class="p-4 font-bold">Day</th>
+                                    <th class="p-4 font-bold">Time</th>
+                                    <th class="p-4 font-bold">Subject</th>
+                                    <th class="p-4 font-bold">Hall / Lab</th>
+                                </tr>
+                            </thead>
+                            <tbody id="teacherTimetableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Floating Chatbot Embed Container -->
+    <div id="chatbot-container"></div>
+
+    <script>
+        // Session Management
+        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Professor', id: 0 };
+        document.querySelector('p.text-sm.font-semibold').innerText = `Prof. ${currentUser.name}`;
+
+        // Data Management with API
+        let studentsList = [];
+        let submissions = [];
+
+        const teacherTimetable = [
+            { day: 'Monday', time: '10:00 AM', subject: 'Data Structures', location: 'Hall A' },
+            { day: 'Tuesday', time: '02:00 PM', subject: 'AI Lab', location: 'Lab 2' },
+            { day: 'Wednesday', time: '11:00 AM', subject: 'Web Dev', location: 'Hall C' }
+        ];
+
+        const classes = [
+            { dateIdx: 10, title: 'Algorithms Seminar' },
+            { dateIdx: 12, title: 'Department Meeting' },
+            { dateIdx: 15, title: 'Viva Voice Exam' }
+        ];
+
+        async function fetchTeacherData() {
+            try {
+                // Fetch Students
+                const stuRes = await fetch('http://localhost:8000/api/students');
+                if (stuRes.ok) {
+                    studentsList = await stuRes.json();
+                    renderStudents();
+                }
+
+                // Fetch Submissions
+                const subRes = await fetch('http://localhost:8000/api/submissions');
+                if (subRes.ok) {
+                    submissions = await subRes.json();
+                    // Enrichment: simplify plagiarism display if not already simplified by backend
+                    submissions = submissions.map(s => ({
+                        ...s,
+                        display_plagiarism: s.plagiarism_score > 40 ? `High (${s.plagiarism_score}%)` : `Safe (${s.plagiarism_score}%)`
+                    }));
+                    renderSubmissionReports();
+                }
+            } catch (err) {
+                console.error('Teacher API Error:', err);
+            }
+        }
+
+        // Section Switching
+        function showSection(sectionId) {
+            document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(`section-${sectionId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-emerald-600', 'text-white', 'border-l-4', 'border-emerald-400');
+                item.classList.add('hover:bg-slate-800', 'hover:text-white');
+            });
+            const activeNav = document.getElementById(`nav-${sectionId}`);
+            activeNav.classList.add('bg-emerald-600', 'text-white', 'border-l-4', 'border-emerald-400');
+            activeNav.classList.remove('hover:bg-slate-800', 'hover:text-white');
+        }
+
+        // Render Student List
+        function renderStudents() {
+            const body = document.getElementById('studentListBody');
+            body.innerHTML = studentsList.map(s => `
+                <tr class="hover:bg-slate-50 border-b transition-colors whitespace-nowrap">
+                    <td class="p-4 font-bold text-slate-800">${s.name}</td>
+                    <td class="p-4 text-slate-500">${s.email}</td>
+                    <td class="p-4 font-mono font-bold">${s.student_id ? 'CS' + s.student_id.toString().padStart(3, '0') : 'N/A'}</td>
+                    <td class="p-4 font-medium">${new Date(s.registration_date).toLocaleDateString()}</td>
+                    <td class="p-4"><span class="px-2 py-1 text-xs font-bold rounded bg-emerald-100 text-emerald-700">Active</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Submissions
+        function renderSubmissionReports() {
+            const body = document.getElementById('submissionReportsBody');
+            body.innerHTML = submissions.map(s => `
+                <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
+                    <td class="p-4 font-bold text-emerald-600">${s.student || 'Unknown Student'}</td>
+                    <td class="p-4 font-medium">${s.name}</td>
+                    <td class="p-4 text-slate-500 text-sm">${s.date}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-bold uppercase">${s.status}</span></td>
+                    <td class="p-4"><span class="px-2 py-1 ${s.display_plagiarism.includes('High') ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'} rounded text-[10px] font-bold">${s.display_plagiarism}</span></td>
+                    <td class="p-4"><button onclick="alert('Viewing document for ${s.student}...') " class="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-500 transition-all"><i class="fa-solid fa-eye"></i></button></td>
+                </tr>
+            `).join('');
+        }
+
+        // Render Timetable
+        function renderTimetable() {
+            const body = document.getElementById('teacherTimetableBody');
+            body.innerHTML = teacherTimetable.map(row => `
+                <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
+                    <td class="p-4 font-bold">${row.day}</td>
+                    <td class="p-4 font-medium text-emerald-600">${row.time}</td>
+                    <td class="p-4">${row.subject}</td>
+                    <td class="p-4 font-bold text-slate-400">${row.location}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Calendar Logic
+        function buildCalendar() {
+            const daysContainer = document.getElementById('calendarDays');
+            const date = new Date();
+            const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+            let html = '';
+            for (let i = 0; i < 2; i++) html += `<div class="p-2 text-slate-200">28</div>`;
+            for (let i = 1; i <= lastDay; i++) {
+                const isToday = i === date.getDate();
+                const hasEvent = classes.some(c => c.dateIdx === i);
+                html += `
+                    <div class="p-4 cursor-pointer hover:bg-emerald-100 rounded-2xl relative transition-all ${isToday ? 'bg-emerald-600 text-white font-bold scale-110 shadow-lg shadow-emerald-500/20' : 'bg-white border border-slate-100'}" onclick="selectDate(${i})">
+                        ${i}
+                        ${hasEvent ? '<span class="absolute bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>' : ''}
+                    </div>`;
+            }
+            daysContainer.innerHTML = html;
+        }
+
+        function selectDate(day) {
+            const agenda = document.getElementById('agendaList');
+            const dayEvents = classes.filter(e => e.dateIdx === day);
+            agenda.innerHTML = dayEvents.length ? dayEvents.map(e => `
+                <li class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-lg flex items-center justify-between">
+                    <div><p class="font-bold text-emerald-900">${e.title}</p><p class="text-xs text-emerald-600">Scheduled for 10:00 AM</p></div>
+                    <i class="fa-solid fa-bell text-emerald-400"></i>
+                </li>
+            `).join('') : '<li class="p-4 bg-slate-50 rounded-lg text-slate-400 text-center border-2 border-dashed">No events for this date</li>';
+        }
+
+        function handleTeacherSearch(e) {
+            const query = e.target.value.toLowerCase().trim();
+
+            // Filter Students
+            const studentRows = document.querySelectorAll('#studentListBody tr');
+            studentRows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+
+            // Filter Submissions
+            const submissionRows = document.querySelectorAll('#submissionReportsBody tr');
+            submissionRows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // Export to Excel (CSV Implementation with Quoting)
+        function exportToExcel() {
+            let csv = '"Student","Assignment","Date","Status","Similarity Status"\n';
+            submissions.forEach(s => {
+                csv += `"${s.student || 'Unknown'}","${s.name}","${s.date}","${s.status}","${s.display_plagiarism}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `Submission_Report_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Charts
+        window.addEventListener('load', () => {
+            const ctxPie = document.getElementById('pieChart').getContext('2d');
+            new Chart(ctxPie, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Safe', 'Suspected', 'Flagged'],
+                    datasets: [{
+                        data: [70, 20, 10],
+                        backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, cutout: '70%' }
+            });
+
+            const ctxBar = document.getElementById('barChart').getContext('2d');
+            new Chart(ctxBar, {
+                type: 'bar',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    datasets: [{
+                        label: 'Submissions',
+                        data: [12, 19, 3, 5, 2],
+                        backgroundColor: '#10B981',
+                        borderRadius: 8
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+        });
+
+        // Initialize
+        fetchTeacherData();
+        renderTimetable();
+        buildCalendar();
+    </script>
+</body>
+
+</html>

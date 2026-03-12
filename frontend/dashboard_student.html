@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - EduVerify</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="./static/js/chatbot.js" defer></script>
+</head>
+
+<body class="bg-slate-50 text-slate-900 font-sans flex h-screen overflow-hidden">
+
+    <!-- Left Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col transition-all hidden md:flex">
+        <div class="h-16 flex items-center px-6 text-white font-bold text-xl border-b border-slate-700">
+            <i class="fa-solid fa-graduation-cap text-blue-500 mr-2"></i> EduVerify
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1">
+            <a href="#" onclick="showSection('dashboard')" id="nav-dashboard"
+                class="flex items-center px-6 py-3 bg-blue-600 border-l-4 border-emerald-400 text-white transition-all nav-item"><i
+                    class="fa-solid fa-house w-6"></i> Dashboard</a>
+            <a href="#" onclick="showSection('assignments')" id="nav-assignments"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-file-arrow-up w-6"></i> Assignment Submission</a>
+            <a href="#" onclick="showSection('history')" id="nav-history"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-clock-rotate-left w-6"></i> Past Assignments</a>
+            <a href="#" onclick="showSection('timetable')" id="nav-timetable"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-calendar-days w-6"></i> Timetable</a>
+            <a href="#" onclick="showSection('warnings')" id="nav-warnings"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-triangle-exclamation w-6 text-red-400"></i> Warnings</a>
+            <a href="#" onclick="showSection('results')" id="nav-results"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-chart-column w-6 text-blue-400"></i> Semester Results</a>
+            <a href="#" onclick="showSection('certificates')" id="nav-certificates"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-certificate w-6 text-yellow-500"></i> Certificates</a>
+            <a href="#" onclick="showSection('records')" id="nav-records"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-folder-open w-6 text-emerald-400"></i> Record Submissions</a>
+            <a href="#" onclick="showSection('schedule')" id="nav-schedule"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-book w-6 text-purple-400"></i> Schedule of Courses</a>
+            <a href="#" onclick="showSection('help')" id="nav-help"
+                class="flex items-center px-6 py-3 hover:bg-slate-800 hover:text-white transition-all nav-item"><i
+                    class="fa-solid fa-circle-info w-6"></i> Help & Contact</a>
+        </nav>
+        <div class="p-4 border-t border-slate-700">
+            <a href="login.html" class="flex items-center px-2 py-2 hover:text-white transition-all text-red-400"><i
+                    class="fa-solid fa-arrow-right-from-bracket w-6"></i> Logout</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+
+        <!-- Header -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10 shrink-0">
+            <div class="flex items-center bg-slate-100 rounded-full px-4 py-2 w-96 max-w-full">
+                <i class="fa-solid fa-search text-slate-400"></i>
+                <input type="text" id="globalSearch" placeholder="Search courses, assignments..."
+                    class="bg-transparent border-none outline-none ml-2 w-full text-sm"
+                    onkeyup="handleGlobalSearch(event)">
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="relative cursor-pointer hover:text-blue-600 transition-colors">
+                    <i class="fa-solid fa-bell text-xl text-slate-600"></i>
+                    <span class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full"></span>
+                </div>
+                <div class="flex items-center gap-3 cursor-pointer group">
+                    <img src="https://ui-avatars.com/api/?name=Student+User&background=2563EB&color=fff" alt="Profile"
+                        class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-blue-500 transition-all">
+                    <div class="hidden sm:block">
+                        <p class="text-sm font-semibold">Student User</p>
+                        <p class="text-xs text-slate-500">Computer Science</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Dashboard Body -->
+        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50 p-6">
+
+            <!-- Dashboard Home Section -->
+            <div id="section-dashboard" class="flex flex-col xl:flex-row gap-6">
+                <div class="flex-1 space-y-6">
+                    <!-- Welcome -->
+                    <div>
+                        <h2 class="text-2xl font-bold">Welcome back, Student! 👋</h2>
+                        <p class="text-slate-500">You have 2 upcoming assignments due this week.</p>
+                    </div>
+
+                    <!-- My Assignments (Quick View) -->
+                    <section class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">My Assignments (Pending)</h3>
+                            <a href="#" onclick="showSection('history')"
+                                class="text-sm text-blue-600 hover:underline">View History</a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="pendingAssignmentsGrid">
+                            <!-- Dynamic -->
+                        </div>
+                    </section>
+
+                    <!-- Analytics Section -->
+                    <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 class="text-lg font-bold mb-4">Performance Trends (GPA)</h3>
+                            <canvas id="gpaChart" height="200"></canvas>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 class="text-lg font-bold mb-4">Submission Tracking</h3>
+                            <canvas id="submissionChart" height="200"></canvas>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- Right Panel: Tasks -->
+                <aside class="w-full xl:w-80 space-y-6">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-bold">Your Tasks</h3>
+                            <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-bold"
+                                id="taskCount">0 tasks</span>
+                        </div>
+                        <form id="taskForm" class="mb-4 space-y-2">
+                            <input type="text" id="taskInput" placeholder="Add a new daily task..."
+                                class="w-full text-sm px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <div class="flex gap-2">
+                                <input type="number" id="taskDay" min="1" max="31" value="9"
+                                    class="w-16 text-sm px-2 py-1 border rounded-lg" title="Day of Month">
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors font-bold text-sm">Add
+                                    Task</button>
+                            </div>
+                        </form>
+                        <div class="flex-1 overflow-y-auto">
+                            <ul id="taskList" class="space-y-2 text-sm"></ul>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            <!-- Assignment Submissions Section -->
+            <div id="section-assignments" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6">Assignment Submissions</h2>
+
+                    <!-- Upload Tool -->
+                    <div class="mb-6 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 text-center">
+                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-blue-500 mb-4"></i>
+                        <h4 class="text-lg font-semibold">Upload New Assignment</h4>
+                        <p class="text-slate-500 mb-6">Drag and drop your files here, or click to browse (PDF, DOCX,
+                            ZIP)</p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <input type="text" id="assignmentTitle" placeholder="Assignment Title"
+                                class="px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="file" id="assignmentFile" class="hidden">
+                            <button onclick="document.getElementById('assignmentFile').click()"
+                                class="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg font-semibold transition-all">Select
+                                File</button>
+                            <button onclick="submitAssignment()"
+                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-blue-500/20">Submit
+                                Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Section -->
+            <div id="section-history" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6">Past Submissions & History</h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="border-b border-slate-100">
+                                <tr class="text-slate-500 text-sm">
+                                    <th class="pb-4 font-semibold text-slate-800">Assignment Name</th>
+                                    <th class="pb-4 font-semibold text-slate-800">Date Submitted</th>
+                                    <th class="pb-4 font-semibold text-slate-800">Status</th>
+                                    <th class="pb-4 font-semibold text-slate-800">Plagiarism Score</th>
+                                    <th class="pb-4 font-semibold text-slate-800 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="submissionHistoryBody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timetable Section -->
+            <div id="section-timetable" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold">Customizable Timetable</h2>
+                        <div class="flex gap-4">
+                            <button onclick="document.getElementById('timetableUpload').click()"
+                                class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg font-semibold hover:bg-emerald-200 transition-all">
+                                <i class="fa-solid fa-upload mr-2"></i>Upload Timetable
+                            </button>
+                            <input type="file" id="timetableUpload" class="hidden"
+                                onchange="handleTimetableUpload(event)">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto mb-8">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 text-sm">
+                                    <th class="p-4 border border-slate-200 font-bold">Day</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Time</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Subject / Activity</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Location</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="timetableBody"></tbody>
+                        </table>
+                    </div>
+                    <div id="timetableAddForm"
+                        class="p-6 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <select id="ttDay" class="p-2 border rounded-lg outline-none">
+                            <option>Monday</option>
+                            <option>Tuesday</option>
+                            <option>Wednesday</option>
+                            <option>Thursday</option>
+                            <option>Friday</option>
+                            <option>Saturday</option>
+                        </select>
+                        <input type="text" id="ttTime" placeholder="Time (e.g. 10:00 AM)"
+                            class="p-2 border rounded-lg outline-none">
+                        <input type="text" id="ttSubject" placeholder="Subject"
+                            class="p-2 border rounded-lg outline-none">
+                        <input type="text" id="ttLocation" placeholder="Location"
+                            class="p-2 border rounded-lg outline-none">
+                        <button onclick="addTimetableRow()"
+                            class="md:col-span-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all">
+                            <i class="fa-solid fa-plus mr-2"></i>Add Entry
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warnings Section -->
+            <div id="section-warnings" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6 text-red-600"><i
+                            class="fa-solid fa-triangle-exclamation mr-2"></i>Plagiarism Warnings</h2>
+                    <div id="warningsList" class="space-y-4">
+                        <!-- Dynamic Warnings -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Semester Results Section -->
+            <div id="section-results" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                        <div class="flex-1">
+                            <h2 class="text-2xl font-bold">Academic Results</h2>
+                            <p class="text-xs text-slate-500 mt-1 italic">Add semesters and associate your courses/GPA.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap gap-2 justify-end">
+                            <input type="text" id="resSem" placeholder="Semester"
+                                class="text-sm px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-32">
+                            <input type="text" id="resCourses" placeholder="Courses (e.g. AI, OS)"
+                                class="text-sm px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none w-64">
+                            <input type="text" id="resGPA" placeholder="GPA"
+                                class="w-20 text-sm px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <button onclick="addResult()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition-all shadow-lg shadow-blue-500/20">Add
+                                Record</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="bg-slate-50 border-b">
+                                <tr class="text-slate-600 text-sm">
+                                    <th class="p-4 font-bold">Semester</th>
+                                    <th class="p-4 font-bold">Courses</th>
+                                    <th class="p-4 font-bold">GPA</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div id="section-certificates" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                        <h2 class="text-2xl font-bold">Certificates & Achievements</h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="certNameInput" placeholder="Certificate Name"
+                                class="text-sm px-3 py-2 border rounded-lg outline-none">
+                            <button onclick="document.getElementById('certFile').click()"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-bold text-sm">Choose
+                                File</button>
+                            <input type="file" id="certFile" class="hidden" onchange="addCertificate(event)">
+                        </div>
+                    </div>
+                    <div id="certificatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+                </div>
+            </div>
+
+            <!-- Record Submissions Section -->
+            <div id="section-records" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                        <h2 class="text-2xl font-bold text-emerald-600">Record Submissions (Soft Copy)</h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="recordTitleInput" placeholder="Record Title"
+                                class="text-sm px-3 py-2 border rounded-lg outline-none">
+                            <button onclick="document.getElementById('recordFile').click()"
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold text-sm">Upload
+                                Soft Copy</button>
+                            <input type="file" id="recordFile" class="hidden" onchange="addRecord(event)">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="recordsGrid"></div>
+                </div>
+            </div>
+
+            <!-- Schedule Section -->
+            <div id="section-schedule" class="hidden space-y-6">
+                <div class="flex flex-col xl:flex-row gap-6">
+                    <div class="flex-1 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                        <h2 class="text-2xl font-bold mb-6 text-purple-600">Course Explorer</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="courseListGrid"></div>
+                    </div>
+                    <aside class="w-full xl:w-80 space-y-6">
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border">
+                            <h3 class="font-bold mb-4">Calendar</h3>
+                            <div id="calendarDays" class="grid grid-cols-7 gap-1 text-center text-sm"></div>
+                        </div>
+                        <div class="bg-blue-600 p-6 rounded-2xl text-white">
+                            <h4 class="font-bold mb-2">Today's Agenda</h4>
+                            <ul id="agendaList" class="text-xs space-y-2 opacity-90"></ul>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div id="section-search" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6" id="searchTitle">Results</h2>
+                    <div id="searchResultsContent" class="space-y-4"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating Chatbot Embed Container -->
+    <div id="chatbot-container"></div>
+
+    <!-- JS Logic -->
+    <script>
+        // DOM Elements
+        const taskForm = document.getElementById('taskForm');
+        const taskInput = document.getElementById('taskInput');
+        const taskList = document.getElementById('taskList');
+        const taskCount = document.getElementById('taskCount');
+
+        // Section Switching Logic
+        function showSection(sectionId) {
+            const section = document.getElementById(`section-${sectionId}`);
+            if (!section) return;
+
+            document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
+            section.classList.remove('hidden');
+
+            // Side Nav highlight
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('bg-blue-600', 'border-l-4', 'border-emerald-400', 'text-white');
+                item.classList.add('hover:bg-slate-800', 'hover:text-white');
+            });
+            const activeNav = document.getElementById(`nav-${sectionId}`);
+            activeNav.classList.add('bg-blue-600', 'border-l-4', 'border-emerald-400', 'text-white');
+            activeNav.classList.remove('hover:bg-slate-800', 'hover:text-white');
+        }
+
+        // Session Management
+        const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Guest', id: 0 };
+        document.querySelector('h2.text-2xl.font-bold').innerText = `Welcome back, ${currentUser.name}! 👋`;
+
+        // Data Management with API
+        let allAssignments = [];
+        let pendingAssignments = [];
+        let submissions = [];
+        let tasks = [];
+
+        async function fetchDashboardData() {
+            try {
+                // Fetch All Assignments
+                const assResponse = await fetch('http://localhost:8000/api/assignments');
+                if (assResponse.ok) {
+                    allAssignments = await assResponse.json();
+                }
+
+                // Fetch Student Submissions
+                if (currentUser.id) {
+                    const subResponse = await fetch(`http://localhost:8000/api/submissions/student/${currentUser.id}`);
+                    if (subResponse.ok) {
+                        submissions = await subResponse.json();
+                        renderSubmissions();
+                    }
+                }
+
+                // Calculate Pending
+                const submittedTitles = submissions.map(s => s.name.toLowerCase());
+                pendingAssignments = allAssignments.filter(a => !submittedTitles.includes(a.title.toLowerCase())).map(a => ({
+                    id: a.assignment_id,
+                    subject: a.subject,
+                    name: a.title,
+                    desc: a.description,
+                    due: new Date(a.deadline).toLocaleDateString(),
+                    color: "blue-500" // Default color
+                }));
+                renderPendingAssignments();
+
+                // Fetch Student Tasks
+                if (currentUser.id) {
+                    const taskResponse = await fetch(`http://localhost:8000/api/tasks/student/${currentUser.id}`);
+                    if (taskResponse.ok) {
+                        const rawTasks = await taskResponse.json();
+                        tasks = rawTasks.map(t => ({
+                            id: t.task_id,
+                            text: t.task_name,
+                            completed: t.completion_status,
+                            dateIdx: t.task_date ? new Date(t.task_date).getDate() : null
+                        }));
+                        renderTasks();
+                    }
+                }
+            } catch (err) {
+                console.error('API Fetch Error:', err);
+            }
+        }
+
+        function renderPendingAssignments() {
+            const grid = document.getElementById('pendingAssignmentsGrid');
+            if (grid) {
+                grid.innerHTML = pendingAssignments.length ? pendingAssignments.map(a => `
+                    <div class="border border-slate-200 rounded-xl p-5 hover:shadow-xl hover:border-blue-300 transition-all relative overflow-hidden group bg-white">
+                        <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <span class="text-xs font-semibold px-2 py-1 bg-slate-100 text-slate-600 rounded-md">${a.subject}</span>
+                                <h4 class="font-bold text-lg mt-2 group-hover:text-blue-600 transition-colors">${a.name}</h4>
+                            </div>
+                            <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded-md border border-red-100">Due: ${a.due}</span>
+                        </div>
+                        <p class="text-sm text-slate-500 mb-4">${a.desc}</p>
+                        <button onclick="preFillSubmission(${a.id}, '${a.name}')" class="px-4 py-2 bg-slate-900 group-hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-all">Submit Now</button>
+                    </div>
+                `).join('') : '<p class="text-slate-400 col-span-2 text-center py-8">No pending assignments! Good job.</p>';
+            }
+        }
+
+        function preFillSubmission(id, name) {
+            document.getElementById('assignmentTitle').value = name;
+            document.getElementById('assignmentTitle').dataset.id = id;
+            showSection('assignments');
+        }
+
+        function renderSubmissions() {
+            const body = document.getElementById('submissionHistoryBody');
+            body.innerHTML = submissions.map(sub => `
+                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
+                    <td class="py-4 font-medium">${sub.name}</td>
+                    <td class="py-4 text-slate-500">${sub.date}</td>
+                    <td class="py-4"><span class="px-2 py-1 rounded text-xs font-bold ${sub.status === 'submitted' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}">${sub.status}</span></td>
+                    <td class="py-4 text-sm font-semibold ${sub.plagiarism.includes('Safe') ? 'text-emerald-600' : 'text-slate-600'}">${sub.plagiarism}</td>
+                    <td class="py-4 text-right">
+                        <button onclick="alert('Viewing: ${sub.name}')" class="text-blue-600 hover:underline font-semibold text-sm">View Details</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function submitAssignment() {
+            const title = document.getElementById('assignmentTitle').value.trim();
+            const assId = document.getElementById('assignmentTitle').dataset.id;
+
+            if (!title) return alert('Please select or specify assignment title');
+
+            // In a real app we'd find the assignment_id properly
+            const assignment = allAssignments.find(a => a.title.toLowerCase() === title.toLowerCase()) || { assignment_id: 1 };
+
+            try {
+                const response = await fetch('http://localhost:8000/api/submissions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: currentUser.id,
+                        assignment_id: assignment.assignment_id,
+                        submitted_file: "assignment_file.pdf"
+                    })
+                });
+
+                if (response.ok) {
+                    alert('Assignment uploaded successfully!');
+                    document.getElementById('assignmentTitle').value = '';
+                    fetchDashboardData();
+                    showSection('history');
+                } else {
+                    const err = await response.json();
+                    alert('Submission failed: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Submission Error:', error);
+                alert('Connection to server failed.');
+            }
+        }
+
+        // Timetable Logic
+        let timetable = JSON.parse(localStorage.getItem('studentTimetable')) || [
+            { day: 'Monday', time: '10:00 AM', subject: 'Data Structures', location: 'Lab 302' },
+            { day: 'Wednesday', time: '02:00 PM', subject: 'Database Systems', location: 'Hall A' }
+        ];
+
+        function renderTimetable() {
+            const body = document.getElementById('timetableBody');
+            body.innerHTML = timetable.map((entry, index) => `
+                <tr class="hover:bg-slate-50 transition-colors">
+                    <td class="p-4 border border-slate-200">${entry.day}</td>
+                    <td class="p-4 border border-slate-200 font-medium">${entry.time}</td>
+                    <td class="p-4 border border-slate-200">${entry.subject}</td>
+                    <td class="p-4 border border-slate-200 text-slate-500">${entry.location}</td>
+                    <td class="p-4 border border-slate-200 text-center">
+                        <div class="flex gap-2 justify-center">
+                            <button onclick="alert('Viewing: ${entry.subject} details')" class="p-2 text-blue-600 hover:bg-blue-50 rounded" title="View"><i class="fa-solid fa-eye"></i></button>
+                            <button onclick="deleteTimetableRow(${index})" class="p-2 text-red-500 hover:bg-red-50 rounded" title="Remove"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            localStorage.setItem('studentTimetable', JSON.stringify(timetable));
+        }
+
+        function addTimetableRow() {
+            const day = document.getElementById('ttDay').value;
+            const time = document.getElementById('ttTime').value;
+            const subject = document.getElementById('ttSubject').value;
+            const location = document.getElementById('ttLocation').value;
+
+            if (!time || !subject) return alert('Time and Subject are required');
+
+            timetable.push({ day, time, subject, location });
+            renderTimetable();
+
+            document.getElementById('ttTime').value = '';
+            document.getElementById('ttSubject').value = '';
+            document.getElementById('ttLocation').value = '';
+        }
+
+        function deleteTimetableRow(index) {
+            timetable.splice(index, 1);
+            renderTimetable();
+        }
+
+        function handleTimetableUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                alert(`Uploaded: ${file.name}. (File processing simulated - row added)`);
+                timetable.push({ day: 'Friday', time: '09:00 AM', subject: `Uploaded: ${file.name}`, location: 'Remote' });
+                renderTimetable();
+            }
+        }
+
+        // Global Search Functionality
+        const mockCourses = [
+            { id: 1, name: 'Data Structures', url: 'https://www.youtube.com/results?search_query=data+structures+course', status: 'available' },
+            { id: 2, name: 'Web Development', url: 'https://www.youtube.com/results?search_query=web+development+crash+course', status: 'completed' },
+            { id: 3, name: 'AI & Machine Learning', url: 'https://www.youtube.com/results?search_query=ai+ml+full+course', status: 'available' }
+        ];
+
+        function handleGlobalSearch(event) {
+            const query = event.target.value.toLowerCase().trim();
+            if (!query) return;
+
+            if (event.key === 'Enter') {
+                showSection('search');
+                const resultsContainer = document.getElementById('searchResultsContent');
+                document.getElementById('searchTitle').innerText = `Search Results for "${query}"`;
+
+                // Search logic across all data
+                const foundSubmissions = submissions.filter(s => s.name.toLowerCase().includes(query));
+                const foundPending = pendingAssignments.filter(a => a.name.toLowerCase().includes(query) || a.subject.toLowerCase().includes(query));
+                const foundCourses = mockCourses.filter(c => c.name.toLowerCase().includes(query));
+
+                let content = '';
+
+                // 1. Pending Assignments
+                if (foundPending.length > 0) {
+                    content += `<div class="mb-6"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">To-Do Assignments</h3>` + foundPending.map(a => `
+                        <div class="p-4 bg-white border-2 border-slate-100 rounded-2xl flex justify-between items-center mb-2 hover:border-blue-200 transition-all">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-blue-50 text-blue-500 rounded-xl flex items-center justify-center font-bold text-lg"><i class="fa-solid fa-file-pen"></i></div>
+                                <div><p class="font-bold text-slate-800">${a.name}</p><p class="text-[10px] text-red-500 font-bold">Due in ${a.due}</p></div>
+                            </div>
+                            <button onclick="showSection('assignments')" class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs font-bold shadow-md shadow-blue-500/20">Submit</button>
+                        </div>`).join('') + `</div>`;
+                }
+
+                // 2. Submitted Assignments
+                if (foundSubmissions.length > 0) {
+                    content += `<div class="mb-6"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Past Submissions</h3>` + foundSubmissions.map(s => `
+                        <div class="p-4 bg-emerald-50/30 border-2 border-emerald-100 rounded-2xl flex justify-between items-center mb-2">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-emerald-100 text-emerald-600 rounded-xl flex items-center justify-center"><i class="fa-solid fa-file-circle-check"></i></div>
+                                <div><p class="font-bold text-slate-800">${s.name}</p><p class="text-[10px] text-emerald-600 font-bold">Submitted on ${s.date} • ${s.status}</p></div>
+                            </div>
+                            <button onclick="showSection('records')" class="bg-white border text-slate-600 px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-slate-50 transition-colors">View Record</button>
+                        </div>`).join('') + `</div>`;
+                }
+
+                // 3. Courses
+                if (foundCourses.length > 0) {
+                    content += `<div class="mb-6"><h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Suggested Courses</h3>` + foundCourses.map(c => `
+                        <div class="p-4 border-2 border-slate-100 rounded-2xl flex items-center justify-between bg-white hover:border-red-100 transition-all mb-2">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 bg-red-100 text-red-600 rounded-xl flex items-center justify-center"><i class="fa-brands fa-youtube"></i></div>
+                                <div><h4 class="font-bold text-slate-800 text-sm">${c.name}</h4><p class="text-[10px] text-slate-400">Library Learning Resource</p></div>
+                            </div>
+                            <a href="${c.url}" target="_blank" class="text-red-600 text-sm font-bold hover:underline">Watch Course</a>
+                        </div>`).join('') + `</div>`;
+                }
+
+                if (!foundPending.length && !foundSubmissions.length && !foundCourses.length) {
+                    content = `<div class="text-center py-20 text-slate-400 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200">
+                        <i class="fa-solid fa-folder-open text-6xl mb-4 opacity-20"></i>
+                        <p class="text-xl font-bold">No matches found for "${query}"</p>
+                        <p class="text-sm mt-1">Try searching for subjects like "Data", "React", or "AI"</p>
+                    </div>`;
+                }
+
+                resultsContainer.innerHTML = content;
+            }
+        }
+
+        // Semester Results
+        let results = JSON.parse(localStorage.getItem('studentResults')) || [
+            { id: 1, sem: 'Fall 2025', courses: 'CS101, MATH202', gpa: '3.8', status: 'Reviewed' }
+        ];
+
+        function renderResults() {
+            const body = document.getElementById('resultsBody');
+            body.innerHTML = results.map((r, i) => `
+                <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
+                    <td class="p-4 font-bold text-blue-600">Sem ${i + 1}: ${r.sem}</td>
+                    <td class="p-4">${r.courses || 'N/A'}</td>
+                    <td class="p-4 font-bold">${r.gpa}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs ring-1 ring-blue-500/20">${r.status}</span></td>
+                    <td class="p-4">
+                        <div class="flex gap-2">
+                             <button onclick="reviewItem('${r.sem} Results Board')" class="text-blue-500 hover:text-blue-700"><i class="fa-solid fa-eye"></i></button>
+                             <button onclick="deleteResult(${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            localStorage.setItem('studentResults', JSON.stringify(results));
+        }
+
+        function addResult() {
+            const sem = document.getElementById('resSem').value.trim();
+            const courses = document.getElementById('resCourses').value.trim();
+            const gpa = document.getElementById('resGPA').value.trim();
+            if (sem && gpa) {
+                results.push({ sem, courses: courses || 'General', gpa, status: 'Verified' });
+                renderResults();
+                document.getElementById('resSem').value = '';
+                document.getElementById('resCourses').value = '';
+                document.getElementById('resGPA').value = '';
+                alert('Semester Academic Record added to your portfolio!');
+            } else {
+                alert('Please fill at least Semester and GPA');
+            }
+        }
+
+        function deleteResult(idx) {
+            results.splice(idx, 1);
+            renderResults();
+        }
+
+        // Certificates & Achievements
+        let certificates = JSON.parse(localStorage.getItem('studentCerts')) || [
+            { id: 1, name: 'Full Stack Excellence', year: '2025', status: 'Badge Awarded' }
+        ];
+
+        function renderCerts() {
+            const grid = document.getElementById('certificatesGrid');
+            grid.innerHTML = certificates.map(c => `
+                <div class="p-6 bg-yellow-50/50 border border-yellow-200 rounded-2xl flex flex-col items-center text-center group">
+                    <div class="w-16 h-16 bg-yellow-400 text-white rounded-full flex items-center justify-center text-3xl mb-4 shadow-lg group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-award"></i>
+                    </div>
+                    <h4 class="font-bold text-lg">${c.name}</h4>
+                    <p class="text-sm text-yellow-800 font-medium">Earned in ${c.year}</p>
+                    <div class="mt-4 flex gap-2">
+                        <span class="px-3 py-1 bg-white text-[10px] font-bold rounded-full border border-yellow-200">${c.status}</span>
+                        <button onclick="reviewItem('${c.name}')" class="text-yellow-600 hover:text-yellow-800"><i class="fa-solid fa-file-contract"></i></button>
+                    </div>
+                </div>
+            `).join('');
+            localStorage.setItem('studentCerts', JSON.stringify(certificates));
+        }
+
+        function addCertificate(event) {
+            const name = document.getElementById('certNameInput').value;
+            const file = event.target.files[0];
+            if (name && file) {
+                certificates.push({ id: Date.now(), name: name, year: '2026', status: 'Review Pending' });
+                renderCerts();
+                document.getElementById('certNameInput').value = '';
+                alert('Achievement certificate uploaded for review!');
+            }
+        }
+
+        function markCourseComplete(name) {
+            alert(`Congratulations! Achievement Badge awarded for "${name}". Added to Certificates.`);
+            certificates.unshift({ id: Date.now(), name: name + ' Achievement', year: '2026', status: 'Course Completed' });
+            renderCerts();
+        }
+
+        // Record Submissions
+        function renderRecords() {
+            const grid = document.getElementById('recordsGrid');
+            grid.innerHTML = submissions.map(s => `
+                <div class="p-6 border-2 border-slate-100 rounded-3xl bg-white flex flex-col gap-4 hover:border-emerald-200 transition-all shadow-sm group">
+                    <div class="flex items-center gap-4 border-b border-slate-50 pb-4">
+                        <div class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-2xl shadow-inner"><i class="fa-solid fa-file-pdf"></i></div>
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-slate-800 truncate">${s.name}</h4>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Verified Soft Copy • ${s.date}</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">Authenticated <i class="fa-solid fa-circle-check ml-1"></i></span>
+                        <div class="flex gap-2">
+                            <button onclick="reviewItem('${s.name}')" class="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-xs font-bold transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-eye"></i> View PDF
+                            </button>
+                            <button onclick="alert('Sent to Teacher for final viewing check.')" class="p-2 bg-slate-50 text-slate-400 rounded-lg hover:bg-slate-100" title="Send Link to Teacher"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addRecord(event) {
+            const title = document.getElementById('recordTitleInput').value;
+            const file = event.target.files[0];
+            if (title && file) {
+                submissions.unshift({
+                    id: Date.now(),
+                    name: title,
+                    date: new Date().toISOString().split('T')[0],
+                    status: 'Uploaded',
+                    plagiarism: 'Stored as Record'
+                });
+                renderRecords();
+                renderSubmissions();
+                document.getElementById('recordTitleInput').value = '';
+                alert('Soft copy record saved successfully!');
+            }
+        }
+
+        // Warnings Data
+        let warnings = [
+            { id: 1, title: 'Alert: Similarity Detected', message: '"Upload PDF is copied, resend it."', teacher: 'Alan Turing', status: 'Action Required', date: '2026-03-08' }
+        ];
+
+        function renderWarnings() {
+            const list = document.getElementById('warningsList');
+            list.innerHTML = warnings.map(w => `
+                <div class="p-6 bg-red-50 border-l-4 border-red-500 rounded-r-xl flex items-start gap-4">
+                    <i class="fa-solid fa-circle-xmark text-red-500 text-2xl mt-1"></i>
+                    <div>
+                        <h4 class="font-bold text-red-800 text-lg">${w.title}</h4>
+                        <p class="text-red-700 mt-1">${w.message} - <span class="font-bold">By ${w.teacher}</span></p>
+                        <div class="mt-4 flex gap-4">
+                            <button onclick="showSection('assignments')" class="px-4 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 transition-all text-xs">Resubmit Now</button>
+                            <button onclick="reviewItem('Teacher Flag Context')" class="px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg font-bold text-xs">View Details</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Review Mock Function
+        function reviewItem(title) {
+            alert(`Opening Viewer for: ${title}\n\n[MOCK VIEWER]\nDocument content is displayed here for verification.\nYou can review the text, formatting, and teacher comments.`);
+        }
+
+        // Calendar Logic
+        function buildCalendar() {
+            const daysContainer = document.getElementById('calendarDays');
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            const lastDay = new Date(year, month + 1, 0).getDate();
+
+            let html = '';
+            // Add padding days (simplified dummy logic)
+            for (let i = 0; i < 3; i++) html += `<div class="p-2 text-slate-300">28</div>`;
+
+            for (let i = 1; i <= lastDay; i++) {
+                const isToday = i === date.getDate();
+                const hasTask = tasks.some(t => t.dateIdx === i);
+                html += `
+                    <div class="p-2 cursor-pointer hover:bg-blue-100 rounded-lg relative ${isToday ? 'bg-blue-600 text-white font-bold' : ''}" onclick="selectDate(${i})">
+                        ${i}
+                        ${hasTask ? '<span class="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-red-400 rounded-full"></span>' : ''}
+                    </div>`;
+            }
+            daysContainer.innerHTML = html;
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            taskCount.innerText = `${tasks.length} tasks`;
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.className = `flex justify-between items-center p-3 border border-slate-100 rounded-lg group ${task.completed ? 'bg-slate-50' : 'bg-white'}`;
+                li.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} onclick="toggleTask(${index})" class="w-4 h-4 text-emerald-500 rounded focus:ring-emerald-500">
+                        <div class="flex flex-col">
+                            <span class="${task.completed ? 'line-through text-slate-400' : 'text-slate-700 font-medium'}">${task.text}</span>
+                            ${task.dateIdx ? `<span class="text-[10px] text-slate-400">Scheduled for ${task.dateIdx}nd</span>` : ''}
+                        </div>
+                    </div>
+                    <button onclick="deleteTask(${index})" class="text-slate-300 hover:text-red-500 transition-colors"><i class="fa-solid fa-trash"></i></button>
+                `;
+                taskList.appendChild(li);
+            });
+            localStorage.setItem('studentTasks', JSON.stringify(tasks));
+            buildCalendar(); // Refresh calendar dots
+        }
+
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = taskInput.value.trim();
+            const day = parseInt(document.getElementById('taskDay').value);
+            if (text) {
+                const date = new Date();
+                date.setDate(day);
+                try {
+                    const res = await fetch('http://localhost:8000/api/tasks', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            student_id: currentUser.id,
+                            task_name: text,
+                            task_date: date.toISOString()
+                        })
+                    });
+                    if (res.ok) {
+                        fetchDashboardData();
+                    } else {
+                        tasks.push({ text, completed: false, time: new Date().toLocaleTimeString(), dateIdx: day });
+                    }
+                } catch (err) {
+                    tasks.push({ text, completed: false, time: new Date().toLocaleTimeString(), dateIdx: day });
+                }
+                taskInput.value = '';
+                renderTasks();
+            }
+        });
+        // Chart JS Logics
+        const gpaEl = document.getElementById('gpaChart');
+        if (gpaEl) {
+            new Chart(gpaEl.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5'],
+                    datasets: [{
+                        label: 'GPA',
+                        data: [3.2, 3.4, 3.5, 3.8, 3.9],
+                        borderColor: '#2563EB',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { display: false } } }
+            });
+        }
+
+        const subEl = document.getElementById('submissionChart');
+        if (subEl) {
+            new Chart(subEl.getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'Pending', 'Late'],
+                    datasets: [{
+                        data: [12, 3, 1],
+                        backgroundColor: ['#10B981', '#9CA3AF', '#EF4444'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, cutout: '75%' }
+            });
+        }
+
+        async function toggleTask(index) {
+            tasks[index].completed = !tasks[index].completed;
+            renderTasks();
+            const task = tasks[index];
+            if (task.id) {
+                try {
+                    await fetch(`http://localhost:8000/api/tasks/${task.id}/toggle`, { method: 'PUT' });
+                } catch (err) {
+                    console.error('Failed to toggle task in backend', err);
+                }
+            }
+        }
+
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            renderTasks();
+        }
+
+        function selectDate(day) {
+            const list = document.getElementById('agendaList');
+            const dayTasks = tasks.filter(t => t.dateIdx === day);
+            list.innerHTML = dayTasks.length ? dayTasks.map(t => `<li class="flex items-center gap-2"><i class="fa-solid fa-circle-check text-xs text-blue-500"></i> ${t.text}</li>`).join('') : '<li>No tasks for this date</li>';
+        }
+
+        function renderScheduleCourses() {
+            const grid = document.getElementById('courseListGrid');
+            if (grid) {
+                grid.innerHTML = mockCourses.map(c => `
+                    <div class="p-6 border border-slate-100 rounded-2xl bg-slate-50 group hover:border-blue-500 transition-all">
+                        <div class="flex justify-between items-start mb-4">
+                            <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-blue-600 text-xl shadow-sm"><i class="fa-solid fa-laptop-code"></i></div>
+                            <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-full">${c.status === 'completed' ? 'Finished' : 'Upcoming'}</span>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">${c.name}</h4>
+                        <p class="text-xs text-slate-500 mb-6 leading-relaxed">Master the fundamentals of ${c.name} with premium curated resources.</p>
+                        <a href="${c.url}" target="_blank" class="w-full block text-center py-2 bg-white border border-slate-200 rounded-lg text-sm font-bold text-slate-700 hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-all"><i class="fa-brands fa-youtube mr-2"></i>View Resources</a>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initialize Everything
+        fetchDashboardData();
+        renderSubmissions();
+        renderPendingAssignments();
+        renderTimetable();
+        renderTasks();
+        renderResults();
+        renderCerts();
+        renderRecords();
+        renderWarnings();
+        buildCalendar();
+        renderScheduleCourses();
+    </script>
+</body>
+
+</html>
