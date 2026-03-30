@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plagiarism Analysis Results - EduVerify</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans">
+    <div class="max-w-6xl mx-auto p-8">
+        <header class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-slate-800">Plagiarism Analysis Detail</h1>
+                <p class="text-slate-500">In-depth comparison of submitted assignments</p>
+            </div>
+            <button onclick="window.history.back()" class="px-4 py-2 bg-white border border-slate-200 rounded-lg hover:bg-slate-100 transition-all font-semibold">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+            </button>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Summary Card -->
+            <div class="lg:col-span-1 space-y-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold mb-4">Comparison Summary</h3>
+                    <div id="loadingSummary" class="text-center py-4">
+                        <i class="fa-solid fa-spinner fa-spin text-2xl text-blue-500"></i>
+                    </div>
+                    <div id="summaryContent" class="hidden space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-slate-500">Combined Similarity</span>
+                            <span id="combinedScore" class="text-2xl font-bold text-blue-600">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2">
+                            <div id="scoreBar" class="bg-blue-600 h-2 rounded-full" style="width: 0%"></div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-50">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-sm text-slate-500">TF-IDF Score</span>
+                                <span id="tfidfScore" class="text-sm font-bold">0%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-sm text-slate-500">Semantic Similarity</span>
+                                <span id="semanticScore" class="text-sm font-bold">0%</span>
+                            </div>
+                        </div>
+                        <div id="statusBadge" class="mt-4 p-3 rounded-xl text-center font-bold text-sm">
+                            Status: Calculating...
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold mb-4">Actions</h3>
+                    <button id="downloadReportBtn" class="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> Download AI Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Detailed View -->
+            <div class="lg:col-span-2 space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-bold mb-6">Sentence-Level Analysis</h3>
+                    <div id="loadingHighlights" class="text-center py-12">
+                        <i class="fa-solid fa-brain fa-bounce text-4xl text-blue-500"></i>
+                        <p class="mt-4 text-slate-500">AI is analyzing sentence structures...</p>
+                    </div>
+                    <div id="highlightsContent" class="hidden space-y-4 max-h-[600px] overflow-y-auto pr-4">
+                        <!-- Sentences will be injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const file1 = urlParams.get('file1');
+            const file2 = urlParams.get('file2');
+            const subId = urlParams.get('subId');
+
+            if (!file1 || !file2) {
+                alert('Missing comparison data');
+                return;
+            }
+
+            // Fetch detail from backend (simulated for now, can add specific endpoint)
+            // For now, we use the results passed in URL if present, or fetch again
+            const score = urlParams.get('score') || 0;
+            const tfidf = urlParams.get('tfidf') || 0;
+            const semantic = urlParams.get('semantic') || 0;
+            const status = urlParams.get('status') || 'Low Similarity';
+
+            // Show summary
+            document.getElementById('loadingSummary').classList.add('hidden');
+            document.getElementById('summaryContent').classList.remove('hidden');
+            document.getElementById('combinedScore').innerText = score + '%';
+            document.getElementById('scoreBar').style.width = score + '%';
+            document.getElementById('tfidfScore').innerText = tfidf + '%';
+            document.getElementById('semanticScore').innerText = semantic + '%';
+
+            const statusBadge = document.getElementById('statusBadge');
+            statusBadge.innerText = 'Status: ' + status;
+            if (status.includes('High')) {
+                statusBadge.classList.add('bg-red-100', 'text-red-700');
+                document.getElementById('scoreBar').classList.replace('bg-blue-600', 'bg-red-500');
+            } else if (status.includes('Medium')) {
+                statusBadge.classList.add('bg-yellow-100', 'text-yellow-700');
+                document.getElementById('scoreBar').classList.replace('bg-blue-600', 'bg-yellow-500');
+            } else {
+                statusBadge.classList.add('bg-emerald-100', 'text-emerald-700');
+                document.getElementById('scoreBar').classList.replace('bg-blue-600', 'bg-emerald-500');
+            }
+
+            // Mock Sentence Highlights (In real app, fetch /api/submissions/compare?file1=...&file2=...)
+            setTimeout(() => {
+                document.getElementById('loadingHighlights').classList.add('hidden');
+                document.getElementById('highlightsContent').classList.remove('hidden');
+                
+                const mockHighlights = [
+                    { text: "The primary goal of this research is to investigate the potential of deep learning.", match: 98 },
+                    { text: "According to the results, the proposed method significantly outperforms traditional algorithms.", match: 45 },
+                    { text: "Data was collected from various sources and preprocessed using standard techniques.", match: 82 },
+                    { text: "Further studies are needed to fully understand the long-term implications.", match: 15 },
+                    { text: "This approach provides a novel way to address the class imbalance problem.", match: 92 }
+                ];
+
+                document.getElementById('highlightsContent').innerHTML = mockHighlights.map(h => `
+                    <div class="p-4 rounded-xl border ${h.match > 80 ? 'bg-red-50 border-red-100' : h.match > 40 ? 'bg-yellow-50 border-yellow-100' : 'bg-slate-50 border-slate-100'}">
+                        <p class="text-sm ${h.match > 80 ? 'text-red-900' : 'text-slate-800'}">${h.text}</p>
+                        <div class="mt-2 flex items-center justify-between">
+                            <span class="text-[10px] font-bold uppercase ${h.match > 80 ? 'text-red-500' : 'text-slate-400'}">AI Match Score</span>
+                            <span class="text-xs font-bold ${h.match > 80 ? 'text-red-600' : 'text-slate-600'}">${h.match}%</span>
+                        </div>
+                    </div>
+                `).join('');
+            }, 1500);
+
+            // Download Report listener
+            document.getElementById('downloadReportBtn').onclick = () => {
+                if (subId) {
+                    window.location.href = `http://127.0.0.1:8000/api/reports/plagiarism/${subId}`;
+                } else {
+                    alert('Submission ID missing for report generation');
+                }
+            };
+        });
+    </script>
+</body>
+</html>

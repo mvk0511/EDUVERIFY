@@ -4,413 +4,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Login - EduVerify</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Login - EduVerify</title>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="./static/css/styles.css">
     <style>
         body {
-            /* Clean blue gradient background */
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            overflow: hidden;
-            /* Hide horizontal scroll during walking */
+            background-color: #f8fafc;
             font-family: 'Inter', sans-serif;
-        }
-
-        /* Glassmorphism card */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            color: #fff;
-            transform: scale(0.5);
-            opacity: 0;
-            transform-origin: center center;
-            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
-        }
-
-        .glass-card.show {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        /* Character Animations */
-        #character-scene {
-            position: absolute;
-            bottom: 30%;
-            left: -150px;
+            margin: 0;
+            padding: 0;
             display: flex;
-            align-items: flex-end;
-            transition: transform 3s linear, opacity 1s ease;
-            z-index: 10;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
         }
 
-        .businessman {
-            width: 80px;
-            height: 120px;
-            position: relative;
-        }
-
-        /* SVG character parts */
-        .head {
-            r: 15;
-            fill: #ffd1b3;
-            cx: 40;
-            cy: 15;
-        }
-
-        .body-suit {
-            fill: #2c3e50;
-        }
-
-        .tie {
-            fill: #e74c3c;
-        }
-
-        .leg {
-            stroke: #2c3e50;
-            stroke-width: 12;
-            stroke-linecap: round;
-        }
-
-        .leg.left {
-            animation: walk 0.5s infinite alternate;
-            transform-origin: 40px 70px;
-        }
-
-        .leg.right {
-            animation: walk 0.5s infinite alternate-reverse;
-            transform-origin: 40px 70px;
-        }
-
-        .arm {
-            stroke: #2c3e50;
-            stroke-width: 10;
-            stroke-linecap: round;
-        }
-
-        .arm.right {
-            animation: swing 0.5s infinite alternate;
-            transform-origin: 40px 35px;
-        }
-
-        @keyframes walk {
-            0% {
-                transform: rotate(-20deg);
-            }
-
-            100% {
-                transform: rotate(20deg);
-            }
-        }
-
-        @keyframes swing {
-            0% {
-                transform: rotate(15deg);
-            }
-
-            100% {
-                transform: rotate(-15deg);
-            }
-        }
-
-        .stop-anim {
-            animation: none !important;
-            transform: rotate(0deg) !important;
-        }
-
-        /* Suitcase */
-        #suitcase-container {
-            position: relative;
-            margin-left: 10px;
-            transform: translateY(-20px);
-            transition: all 0.5s ease;
-        }
-
-        .suitcase {
-            width: 40px;
-            height: 30px;
-            background: #8e44ad;
-            border-radius: 4px;
-            position: relative;
-            transition: all 0.5s ease;
-            z-index: 2;
-        }
-
-        .suitcase-handle {
-            width: 16px;
-            height: 10px;
-            border: 3px solid #6c3483;
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            position: absolute;
-            top: -10px;
-            left: 9px;
-        }
-
-        .suitcase.open {
-            height: 8px;
-            transform: translateY(22px);
-            background: #6c3483;
-        }
-
-        .suitcase.open .suitcase-handle {
-            opacity: 0;
-        }
-
-        /* Glowing Effect */
-        .glow-effect {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #00f2fe;
-            box-shadow: 0 0 20px 10px #00f2fe, 0 0 40px 20px #4facfe, 0 0 80px 40px #4facfe;
-            opacity: 0;
-            transition: opacity 1s ease;
-            z-index: 1;
-        }
-
-        .glow-effect.active {
-            opacity: 1;
-            animation: pulse-glow 2s infinite alternate;
-        }
-
-        @keyframes pulse-glow {
-            0% {
-                transform: translate(-50%, -50%) scale(1);
-                filter: hue-rotate(0deg);
-            }
-
-            100% {
-                transform: translate(-50%, -50%) scale(1.5);
-                filter: hue-rotate(30deg);
-            }
-        }
-
-        /* Glass Input */
-        .glass-input {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            transition: all 0.3s;
-        }
-
-        .glass-input:focus {
-            background: rgba(255, 255, 255, 0.15);
-            border-color: #00f2fe;
-            outline: none;
-            box-shadow: 0 0 10px rgba(0, 242, 254, 0.5);
-        }
-
-        .glass-input::placeholder {
-            color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Radio Buttons */
-        .role-radio:checked+div {
-            background: rgba(0, 242, 254, 0.2);
-            border-color: #00f2fe;
-            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
-        }
-
-        /* Particles */
-        .particles {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        #login-wrapper {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 50;
-            width: 100%;
-            max-width: 28rem;
-            pointer-events: none;
-            /* enable after animation */
+        .role-radio:checked + div {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            font-weight: 700;
         }
     </style>
 </head>
 
-<body class="min-h-screen relative w-full h-full m-0 p-0 text-slate-100">
-
-    <!-- Ambient Particles -->
-    <div class="particles" id="particles"></div>
-
-    <!-- Animation Scene -->
-    <div id="character-scene">
-        <!-- Businessman SVG -->
-        <svg class="businessman" viewBox="0 0 80 120">
-            <!-- Left Leg -->
-            <line class="leg left" x1="40" y1="70" x2="40" y2="115" />
-            <!-- Body -->
-            <path class="body-suit" d="M 20 35 L 60 35 Q 65 35 60 75 L 20 75 Q 15 35 20 35 Z" />
-            <!-- White shirt & Tie -->
-            <polygon points="35,35 45,35 40,55" fill="#fff" />
-            <polygon class="tie" points="38,40 42,40 40,65" />
-            <!-- Right Leg -->
-            <line class="leg right" x1="40" y1="70" x2="40" y2="115" />
-            <!-- Head -->
-            <circle class="head" />
-            <!-- Right Arm holding suitcase -->
-            <line class="arm right" x1="40" y1="35" x2="55" y2="80" />
-        </svg>
-
-        <!-- Suitcase -->
-        <div id="suitcase-container">
-            <div class="suitcase" id="suitcase">
-                <div class="suitcase-handle"></div>
+<body>
+    <div class="bg-white p-8 md:p-10 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fa-solid fa-graduation-cap text-blue-600 text-3xl"></i>
             </div>
-            <!-- Glow Effect inside suitcase -->
-            <div class="glow-effect" id="glow"></div>
+            <h2 class="text-3xl font-bold text-slate-800 tracking-tight">EduVerify</h2>
+            <p class="text-slate-500 mt-2 text-sm">Please log in to access your portal</p>
         </div>
-    </div>
 
-    <!-- Login Container -->
-    <div id="login-wrapper" class="px-4">
-        <div id="login-card" class="glass-card p-8 md:p-10 rounded-2xl w-full">
-            <div class="text-center mb-8">
-                <div
-                    class="w-16 h-16 bg-gradient-to-tr from-[#00f2fe] to-[#4facfe] rounded-full flex items-center justify-center mx-auto mb-4 shadow-[0_0_20px_rgba(0,242,254,0.4)]">
-                    <i class="fa-solid fa-gem text-white text-2xl"></i>
+        <form id="loginForm" class="space-y-6">
+            <div>
+                <label class="block text-sm font-semibold text-slate-700 mb-2">Select Account Type</label>
+                <div class="flex gap-4">
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="role" value="student" checked class="role-radio sr-only">
+                        <div class="py-3 text-center border border-slate-200 rounded-lg text-slate-600 font-medium transition-all hover:bg-slate-50">
+                            <i class="fa-solid fa-user-graduate mr-2"></i>Student
+                        </div>
+                    </label>
+                    <label class="flex-1 cursor-pointer">
+                        <input type="radio" name="role" value="teacher" class="role-radio sr-only">
+                        <div class="py-3 text-center border border-slate-200 rounded-lg text-slate-600 font-medium transition-all hover:bg-slate-50">
+                            <i class="fa-solid fa-chalkboard-user mr-2"></i>Teacher
+                        </div>
+                    </label>
                 </div>
-                <h2 class="text-3xl font-bold text-white tracking-wide">Welcome Back</h2>
-                <p class="text-slate-200 mt-2 text-sm font-light">Enter your credentials to continue</p>
             </div>
 
-            <form id="loginForm" class="space-y-6">
+            <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-slate-300 mb-2">Select Role</label>
-                    <div class="flex gap-4">
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="role" value="student" checked class="role-radio sr-only">
-                            <div
-                                class="py-2.5 text-center border border-white/20 rounded-lg text-white font-medium transition-all backdrop-blur-md">
-                                Student</div>
-                        </label>
-                        <label class="flex-1 cursor-pointer">
-                            <input type="radio" name="role" value="teacher" class="role-radio sr-only">
-                            <div
-                                class="py-2.5 text-center border border-white/20 rounded-lg text-white font-medium transition-all backdrop-blur-md">
-                                Teacher</div>
-                        </label>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-light text-slate-300 mb-1">Email / Username</label>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Email Address</label>
                     <div class="relative">
                         <i class="fa-regular fa-envelope absolute left-4 top-3.5 text-slate-400"></i>
-                        <input type="email" id="email" required
-                            class="glass-input w-full pl-11 pr-4 py-3 rounded-lg text-sm"
-                            placeholder="user@university.edu" value="demo@university.edu">
+                        <input type="email" id="email" required class="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm" placeholder="user@university.edu" value="demo@university.edu">
                     </div>
                 </div>
 
                 <div>
-                    <div class="flex justify-between mb-1">
-                        <label class="block text-sm font-light text-slate-300">Password</label>
-                        <a href="#" class="text-sm text-[#00f2fe] hover:text-white transition-colors">Forgot
-                            password?</a>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-medium text-slate-700">Password</label>
+                        <a href="#" class="text-sm text-blue-600 hover:text-blue-800 hover:underline">Forgot password?</a>
                     </div>
                     <div class="relative">
                         <i class="fa-solid fa-lock absolute left-4 top-3.5 text-slate-400"></i>
-                        <input type="password" id="password" required
-                            class="glass-input w-full pl-11 pr-4 py-3 rounded-lg text-sm" placeholder="••••••••"
-                            value="demo123">
+                        <input type="password" id="password" required class="w-full pl-11 pr-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm" placeholder="••••••••" value="demo123">
                     </div>
                 </div>
+            </div>
 
-                <div class="pt-2">
-                    <button type="submit"
-                        class="w-full py-3.5 bg-gradient-to-r from-[#00f2fe] to-[#4facfe] hover:from-[#4facfe] hover:to-[#00f2fe] text-slate-900 rounded-xl font-bold shadow-[0_4px_20px_rgba(0,242,254,0.4)] transition-all flex justify-center items-center gap-2 transform hover:scale-[1.02]">
-                        Login <i class="fa-solid fa-arrow-right"></i>
-                    </button>
-                </div>
+            <div class="pt-2">
+                <button type="submit" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-600/30 transition-all flex justify-center items-center gap-2">
+                    Login securely <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
 
-                <div class="text-center pt-2">
-                    <button type="button" onclick="window.location.href='register.html'"
-                        class="w-full py-3 border border-white/30 hover:border-white/60 text-white rounded-xl font-medium transition-all flex justify-center items-center gap-2 backdrop-blur-sm">
-                        Sign Up <i class="fa-solid fa-user-plus text-sm"></i>
-                    </button>
-                </div>
-            </form>
-        </div>
+            <p class="text-center text-slate-600 text-sm mt-6">
+                Don't have an account? <a href="register.html" class="text-blue-600 font-bold hover:underline">Register now</a>
+            </p>
+        </form>
     </div>
 
     <!-- Scripts -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const scene = document.getElementById('character-scene');
-            const legs = document.querySelectorAll('.leg');
-            const arm = document.querySelector('.arm.right');
-            const suitcase = document.getElementById('suitcase');
-            const glow = document.getElementById('glow');
-            const loginCard = document.getElementById('login-card');
-            const loginWrapper = document.getElementById('login-wrapper');
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = loginForm.querySelector('button[type="submit"]');
 
-            // Calculate center position for the character
-            const targetX = (window.innerWidth / 2) - 40;
-
-            // Start walking animation
-            setTimeout(() => {
-                scene.style.transform = `translateX(${targetX + 150}px)`;
-            }, 100);
-
-            // Stop walking and trigger sequence
-            setTimeout(() => {
-                // Stop leg and arm animations
-                legs.forEach(leg => leg.classList.add('stop-anim'));
-                arm.classList.add('stop-anim');
-
-                // Open Suitcase
-                setTimeout(() => {
-                    suitcase.classList.add('open');
-
-                    // Activate glow
-                    setTimeout(() => {
-                        glow.classList.add('active');
-
-                        // Show Login Card
-                        setTimeout(() => {
-                            // Fade out character scene
-                            scene.style.opacity = '0';
-
-                            // Enable interactions
-                            loginWrapper.style.pointerEvents = 'auto';
-
-                            // Pop out the card
-                            loginCard.classList.add('show');
-                        }, 800);
-
-                    }, 500);
-                }, 500);
-
-            }, 3100);
-        });
-
-        // Backend auth logic
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const role = document.querySelector('input[name="role"]:checked').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
+            loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Authenticating...';
+            loginBtn.disabled = true;
+
             try {
-                const response = await fetch('http://localhost:8000/api/auth/login', {
+                const response = await fetch('http://127.0.0.1:8000/api/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password, role })
@@ -430,39 +126,16 @@
                         window.location.href = 'dashboard_teacher.html';
                     }
                 } else {
-                    alert(result.detail || 'Login failed');
+                    alert('Login Failed: ' + (result.detail || 'Incorrect credentials.'));
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Connection to server failed. Please ensure the backend (FastAPI) is running.');
+                alert('Connection to server failed. Please ensure the backend is running.');
+            } finally {
+                loginBtn.innerHTML = 'Login securely <i class="fa-solid fa-arrow-right"></i>';
+                loginBtn.disabled = false;
             }
         });
-
-        // Add drifting particles in background
-        const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 40; i++) {
-            const particle = document.createElement('div');
-            particle.style.position = 'absolute';
-            particle.style.width = Math.random() * 4 + 1 + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.background = 'rgba(255,255,255,0.4)';
-            particle.style.borderRadius = '50%';
-            particle.style.left = Math.random() * 100 + 'vw';
-            particle.style.top = Math.random() * 100 + 'vh';
-            particle.style.animation = `drift ${Math.random() * 10 + 10}s linear infinite`;
-            particlesContainer.appendChild(particle);
-        }
-
-        const style = document.createElement('style');
-        style.innerHTML = `
-            @keyframes drift {
-                0% { transform: translateY(0) translateX(0); opacity: 0; }
-                50% { opacity: 1; }
-                100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
-
 </html>

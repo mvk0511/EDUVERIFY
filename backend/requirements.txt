@@ -1,7 +1,8 @@
 fastapi
 uvicorn
-sqlalchemy
-pydantic
+pdfminer.six
+scikit-learn
+numpy
 python-multipart
-pymysql
-cryptography
+python-multipart
+# google-generativeai removed (switching to local NLP)

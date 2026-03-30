@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Student Dashboard - EduVerify</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="./static/js/chatbot.js" defer></script>
@@ -74,9 +74,9 @@
                 </div>
                 <div class="flex items-center gap-3 cursor-pointer group">
                     <img src="https://ui-avatars.com/api/?name=Student+User&background=2563EB&color=fff" alt="Profile"
-                        class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-blue-500 transition-all">
+                         id="headerAvatar" class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-blue-500 transition-all">
                     <div class="hidden sm:block">
-                        <p class="text-sm font-semibold">Student User</p>
+                        <p class="text-sm font-semibold" id="headerName">Student User</p>
                         <p class="text-xs text-slate-500">Computer Science</p>
                     </div>
                 </div>
@@ -91,8 +91,8 @@
                 <div class="flex-1 space-y-6">
                     <!-- Welcome -->
                     <div>
-                        <h2 class="text-2xl font-bold">Welcome back, Student! 👋</h2>
-                        <p class="text-slate-500">You have 2 upcoming assignments due this week.</p>
+                        <h2 class="text-2xl font-bold" id="welcomeUser">Welcome back, Student! 👋</h2>
+                        <p class="text-slate-500" id="welcomeStats">You have 0 upcoming assignments due this week.</p>
                     </div>
 
                     <!-- My Assignments (Quick View) -->
@@ -151,26 +151,63 @@
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                     <h2 class="text-2xl font-bold mb-6">Assignment Submissions</h2>
 
+                    <!-- Success Message -->
+                    <div id="uploadSuccess"
+                        class="hidden mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-semibold flex items-center gap-3 animate-pulse">
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-2xl"></i>
+                        <div>
+                            <p class="font-bold">Assignment Submitted Successfully!</p>
+                            <p class="text-sm text-emerald-600">Your file has been uploaded and is now visible to your
+                                teacher.</p>
+                        </div>
+                    </div>
+
                     <!-- Upload Tool -->
-                    <div class="mb-6 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 text-center">
+                    <div class="mb-6 p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 text-center"
+                        id="uploadDropZone">
                         <i class="fa-solid fa-cloud-arrow-up text-4xl text-blue-500 mb-4"></i>
                         <h4 class="text-lg font-semibold">Upload New Assignment</h4>
-                        <p class="text-slate-500 mb-6">Drag and drop your files here, or click to browse (PDF, DOCX,
-                            ZIP)</p>
+                        <p class="text-slate-500 mb-6">Select assignment, choose your PDF file, then click Submit</p>
+
+                        <!-- Assignment Selector -->
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-4">
+                            <select id="assignmentSelect"
+                                class="px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 w-64">
+                                <option value="">-- Select Assignment --</option>
+                            </select>
+                            <input type="text" id="assignmentTitle" placeholder="Or type assignment title"
+                                class="px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500 hidden">
+                        </div>
+
+                        <!-- File Selection with Tick Mark -->
                         <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                            <input type="text" id="assignmentTitle" placeholder="Assignment Title"
-                                class="px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500">
-                            <input type="file" id="assignmentFile" class="hidden">
+                            <input type="file" id="assignmentFile" class="hidden" accept=".pdf,.docx,.zip"
+                                onchange="onFileSelected()">
                             <button onclick="document.getElementById('assignmentFile').click()"
-                                class="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg font-semibold transition-all">Select
-                                File</button>
-                            <button onclick="submitAssignment()"
-                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-blue-500/20">Submit
-                                Now</button>
+                                class="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg font-semibold transition-all flex items-center gap-2"
+                                id="selectFileBtn">
+                                <i class="fa-solid fa-folder-open"></i> Select File
+                            </button>
+
+                            <!-- File Selected Indicator -->
+                            <div id="fileSelectedIndicator"
+                                class="hidden flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-300 rounded-lg">
+                                <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+                                <span class="text-emerald-700 font-semibold text-sm"
+                                    id="selectedFileName">file.pdf</span>
+                                <button onclick="clearFileSelection()" class="text-red-400 hover:text-red-600 ml-2"><i
+                                        class="fa-solid fa-xmark"></i></button>
+                            </div>
+
+                            <button onclick="submitAssignment()" id="submitAssignmentBtn"
+                                class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition-all shadow-lg shadow-blue-500/20 flex items-center gap-2">
+                                <i class="fa-solid fa-paper-plane"></i> Submit Now
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+
 
             <!-- History Section -->
             <div id="section-history" class="hidden space-y-6">
@@ -188,6 +225,75 @@
                                 </tr>
                             </thead>
                             <tbody id="submissionHistoryBody">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Record Submission Section -->
+            <div id="section-records" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <h2 class="text-2xl font-bold mb-6">Record Submission</h2>
+                    
+                    <div id="recordUploadSuccess" class="hidden mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-semibold flex items-center gap-3">
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-2xl"></i>
+                        <div>
+                            <p class="font-bold">Record Uploaded Successfully!</p>
+                            <p class="text-sm text-emerald-600">Your record has been tracked.</p>
+                        </div>
+                    </div>
+
+                    <div class="p-6 border-2 border-dashed border-slate-200 rounded-2xl bg-slate-50 text-center" id="recordDropZone">
+                        <i class="fa-solid fa-folder-open text-4xl text-emerald-500 mb-4"></i>
+                        <h4 class="text-lg font-semibold">Upload New Record</h4>
+                        <p class="text-slate-500 mb-6">Select a file from your device, then click Upload</p>
+
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                            <input type="file" id="recordFile" class="hidden" accept=".pdf,.docx,.zip" onchange="onRecordFileSelected()">
+                            <button onclick="document.getElementById('recordFile').click()" class="px-6 py-2 bg-slate-200 hover:bg-slate-300 rounded-lg font-semibold transition-all flex items-center gap-2" id="selectRecordBtn">
+                                <i class="fa-solid fa-file"></i> Choose File
+                            </button>
+
+                            <div id="recordFileSelected" class="hidden flex items-center gap-2 px-4 py-2 bg-emerald-50 border border-emerald-300 rounded-lg">
+                                <i class="fa-solid fa-circle-check text-emerald-500 text-lg"></i>
+                                <span class="text-emerald-700 font-semibold text-sm" id="selectedRecordName">file.pdf</span>
+                                <button onclick="clearRecordSelection()" class="text-red-400 hover:text-red-600 ml-2"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+
+                            <button onclick="submitRecord()" id="submitRecordBtn" class="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold transition-all shadow-lg flex items-center gap-2">
+                                <i class="fa-solid fa-upload"></i> Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Certificates Section -->
+            <div id="section-certificates" class="hidden space-y-6">
+                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                        <h2 class="text-2xl font-bold">My Certificates</h2>
+                        <div class="flex gap-2">
+                            <input type="text" id="certNameInput" placeholder="Certificate Name"
+                                class="text-sm px-3 py-2 border rounded-lg outline-none">
+                            <button onclick="document.getElementById('certFile').click()"
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-bold text-sm" id="uploadCertBtn">Choose File</button>
+                            <input type="file" id="certFile" class="hidden" onchange="addCertificate(event)" accept=".pdf,image/*">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left bg-slate-50 border-b border-slate-200 rounded-lg">
+                            <thead class="border-b border-slate-200">
+                                <tr class="text-slate-500 text-sm">
+                                    <th class="p-4 font-semibold text-slate-800">Certificate Name</th>
+                                    <th class="p-4 font-semibold text-slate-800">Date Issued</th>
+                                    <th class="p-4 font-semibold text-slate-800">Status</th>
+                                    <th class="p-4 font-semibold text-slate-800 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="certificatesBody">
                                 <!-- Dynamic content -->
                             </tbody>
                         </table>
@@ -216,7 +322,6 @@
                                     <th class="p-4 border border-slate-200 font-bold">Day</th>
                                     <th class="p-4 border border-slate-200 font-bold">Time</th>
                                     <th class="p-4 border border-slate-200 font-bold">Subject / Activity</th>
-                                    <th class="p-4 border border-slate-200 font-bold">Location</th>
                                     <th class="p-4 border border-slate-200 font-bold">Actions</th>
                                 </tr>
                             </thead>
@@ -236,8 +341,6 @@
                         <input type="text" id="ttTime" placeholder="Time (e.g. 10:00 AM)"
                             class="p-2 border rounded-lg outline-none">
                         <input type="text" id="ttSubject" placeholder="Subject"
-                            class="p-2 border rounded-lg outline-none">
-                        <input type="text" id="ttLocation" placeholder="Location"
                             class="p-2 border rounded-lg outline-none">
                         <button onclick="addTimetableRow()"
                             class="md:col-span-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded-lg transition-all">
@@ -296,23 +399,7 @@
                 </div>
             </div>
 
-            <!-- Certificates Section -->
-            <div id="section-certificates" class="hidden space-y-6">
-                <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                        <h2 class="text-2xl font-bold">Certificates & Achievements</h2>
-                        <div class="flex gap-2">
-                            <input type="text" id="certNameInput" placeholder="Certificate Name"
-                                class="text-sm px-3 py-2 border rounded-lg outline-none">
-                            <button onclick="document.getElementById('certFile').click()"
-                                class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg font-bold text-sm">Choose
-                                File</button>
-                            <input type="file" id="certFile" class="hidden" onchange="addCertificate(event)">
-                        </div>
-                    </div>
-                    <div id="certificatesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-                </div>
-            </div>
+
 
             <!-- Record Submissions Section -->
             <div id="section-records" class="hidden space-y-6">
@@ -393,7 +480,11 @@
 
         // Session Management
         const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Guest', id: 0 };
-        document.querySelector('h2.text-2xl.font-bold').innerText = `Welcome back, ${currentUser.name}! 👋`;
+        const hdrName = document.getElementById('headerName');
+        const hdrAvatar = document.getElementById('headerAvatar');
+        if (hdrName) hdrName.innerText = currentUser.name;
+        if (hdrAvatar) hdrAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=2563EB&color=fff`;
+        document.querySelector('h2.text-2xl.font-bold').innerText = `Welcome back, ${currentUser.name.split(' ')[0]}! 👋`;
 
         // Data Management with API
         let allAssignments = [];
@@ -404,14 +495,14 @@
         async function fetchDashboardData() {
             try {
                 // Fetch All Assignments
-                const assResponse = await fetch('http://localhost:8000/api/assignments');
+                const assResponse = await fetch('http://127.0.0.1:8000/api/assignments');
                 if (assResponse.ok) {
                     allAssignments = await assResponse.json();
                 }
 
                 // Fetch Student Submissions
                 if (currentUser.id) {
-                    const subResponse = await fetch(`http://localhost:8000/api/submissions/student/${currentUser.id}`);
+                    const subResponse = await fetch(`http://127.0.0.1:8000/api/submissions/student/${currentUser.id}`);
                     if (subResponse.ok) {
                         submissions = await subResponse.json();
                         renderSubmissions();
@@ -419,20 +510,50 @@
                 }
 
                 // Calculate Pending
-                const submittedTitles = submissions.map(s => s.name.toLowerCase());
-                pendingAssignments = allAssignments.filter(a => !submittedTitles.includes(a.title.toLowerCase())).map(a => ({
+                const submittedTitles = submissions.map(s => (s.name || '').toLowerCase());
+                pendingAssignments = allAssignments.filter(a => !submittedTitles.includes((a.title || '').toLowerCase())).map(a => ({
                     id: a.assignment_id,
                     subject: a.subject,
                     name: a.title,
                     desc: a.description,
                     due: new Date(a.deadline).toLocaleDateString(),
-                    color: "blue-500" // Default color
+                    color: "blue-500", // Default color
+                    question_pdf: a.question_pdf
                 }));
                 renderPendingAssignments();
 
+                // Update Welcome Stats
+                const welcomeStats = document.getElementById('welcomeStats');
+                if (welcomeStats) {
+                    welcomeStats.innerText = `You have ${pendingAssignments.length} upcoming assignment${pendingAssignments.length !== 1 ? 's' : ''} due this week.`;
+                }
+
+                // Fetch Notifications
+                if (currentUser.id) {
+                    const notifResponse = await fetch(`http://127.0.0.1:8000/api/notifications/student/${currentUser.id}`);
+                    if (notifResponse.ok) {
+                        let notifs = await notifResponse.json();
+                        
+                        // Append Plagiarism > 85% Warnings dynamically!
+                        submissions.forEach(sub => {
+                            const scoreString = sub.plagiarism || "";
+                            // Extract numbers from "Checked (86%)"
+                            const matched = scoreString.match(/\((\d+)%\)/);
+                            if (matched && parseInt(matched[1]) > 85) {
+                                notifs.push({
+                                    title: "Critical Plagiarism Alert",
+                                    message: `Your submission for '${sub.name}' received a plagiarism score of ${matched[1]}%. Please resend it immediately.`
+                                });
+                            }
+                        });
+                        
+                        renderNotifications(notifs);
+                    }
+                }
+
                 // Fetch Student Tasks
                 if (currentUser.id) {
-                    const taskResponse = await fetch(`http://localhost:8000/api/tasks/student/${currentUser.id}`);
+                    const taskResponse = await fetch(`http://127.0.0.1:8000/api/tasks/student/${currentUser.id}`);
                     if (taskResponse.ok) {
                         const rawTasks = await taskResponse.json();
                         tasks = rawTasks.map(t => ({
@@ -444,13 +565,54 @@
                         renderTasks();
                     }
                 }
+
+                // Fetch Certificates
+                if (currentUser.id) {
+                    const certResponse = await fetch(`http://127.0.0.1:8000/api/certificates/${currentUser.id}`);
+                    if (certResponse.ok) {
+                        const certs = await certResponse.json();
+                        renderCertificates(certs);
+                    }
+                }
+                
+                // Mount Dynamic Submissions Tracking Chart safely after fetch!
+                renderSubmissionChart();
+                
             } catch (err) {
                 console.error('API Fetch Error:', err);
             }
         }
 
+        function renderCertificates(certs) {
+            const body = document.getElementById('certificatesBody');
+            if (!certs || certs.length === 0) {
+                body.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-slate-400 font-medium">No Certificates Available</td></tr>';
+                return;
+            }
+            body.innerHTML = certs.map(c => `
+                <tr class="hover:bg-slate-50 transition-colors border-b border-slate-100">
+                    <td class="p-4 font-bold text-slate-700"><i class="fa-solid fa-award text-yellow-500 mr-2"></i> ${c.name || c.filename || 'Certificate'}</td>
+                    <td class="p-4 text-slate-500">${c.date_issued || new Date().toLocaleDateString()}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-[10px] font-bold uppercase rounded tracking-wider">${c.status || 'Review Pending'}</span></td>
+                    <td class="p-4 text-right">
+                        <a href="http://127.0.0.1:8000/uploads/certificates/${c.filename || c.filepath?.split('/').pop() || ''}" target="_blank" class="px-4 py-2 bg-slate-900 text-white rounded-lg hover:bg-blue-600 transition-all text-xs font-bold inline-flex items-center gap-2">
+                            <i class="fa-solid fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
         function renderPendingAssignments() {
             const grid = document.getElementById('pendingAssignmentsGrid');
+            const dropdown = document.getElementById('assignmentSelect');
+
+            // Populate assignment dropdown
+            if (dropdown) {
+                dropdown.innerHTML = '<option value="">-- Select Assignment --</option>' +
+                    allAssignments.map(a => `<option value="${a.assignment_id}">${a.title} (${a.subject})</option>`).join('');
+            }
+
             if (grid) {
                 grid.innerHTML = pendingAssignments.length ? pendingAssignments.map(a => `
                     <div class="border border-slate-200 rounded-xl p-5 hover:shadow-xl hover:border-blue-300 transition-all relative overflow-hidden group bg-white">
@@ -463,58 +625,142 @@
                             <span class="text-xs font-bold text-red-500 bg-red-50 px-2 py-1 rounded-md border border-red-100">Due: ${a.due}</span>
                         </div>
                         <p class="text-sm text-slate-500 mb-4">${a.desc}</p>
-                        <button onclick="preFillSubmission(${a.id}, '${a.name}')" class="px-4 py-2 bg-slate-900 group-hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-all">Submit Now</button>
+                        <div class="flex gap-2">
+                            <button onclick="preFillSubmission(${a.id}, '${a.name}')" class="px-4 py-2 bg-slate-900 group-hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-all">Submit Now</button>
+                            ${a.question_pdf ? `<a href="http://127.0.0.1:8000/uploads/${a.question_pdf}" target="_blank" class="px-4 py-2 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-lg hover:bg-emerald-200 transition-all">Questions PDF</a>` : ''}
+                        </div>
                     </div>
                 `).join('') : '<p class="text-slate-400 col-span-2 text-center py-8">No pending assignments! Good job.</p>';
             }
         }
 
         function preFillSubmission(id, name) {
-            document.getElementById('assignmentTitle').value = name;
-            document.getElementById('assignmentTitle').dataset.id = id;
+            const dropdown = document.getElementById('assignmentSelect');
+            if (dropdown) {
+                dropdown.value = id;
+            }
             showSection('assignments');
         }
 
         function renderSubmissions() {
             const body = document.getElementById('submissionHistoryBody');
-            body.innerHTML = submissions.map(sub => `
-                <tr class="border-b border-slate-50 hover:bg-slate-50/50 transition-colors">
-                    <td class="py-4 font-medium">${sub.name}</td>
+            body.innerHTML = submissions.map(sub => {
+                const isFlagged = sub.status === 'flagged';
+                const rowClass = isFlagged ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-slate-50/50';
+                
+                return `
+                <tr class="border-b border-slate-50 ${rowClass} transition-colors">
+                    <td class="py-4">
+                        <span class="font-medium ${isFlagged ? 'text-red-700 font-bold' : ''}">${sub.name}</span>
+                        ${isFlagged ? '<br><span class="text-[10px] text-red-600 font-bold mt-1 block"><i class="fa-solid fa-triangle-exclamation mr-1"></i>⚠️ High Plagiarism Detected (90%+). Please resubmit.</span>' : ''}
+                    </td>
                     <td class="py-4 text-slate-500">${sub.date}</td>
-                    <td class="py-4"><span class="px-2 py-1 rounded text-xs font-bold ${sub.status === 'submitted' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}">${sub.status}</span></td>
-                    <td class="py-4 text-sm font-semibold ${sub.plagiarism.includes('Safe') ? 'text-emerald-600' : 'text-slate-600'}">${sub.plagiarism}</td>
+                    <td class="py-4"><span class="px-2 py-1 rounded text-xs font-bold uppercase ${
+                        isFlagged ? 'bg-red-100 text-red-700 blink-warning' : 
+                        sub.status === 'submitted' ? 'bg-emerald-100 text-emerald-700' : 
+                        'bg-blue-100 text-blue-700'
+                    }">${sub.status}</span></td>
+                    <td class="py-4 text-sm font-semibold ${sub.plagiarism && sub.plagiarism.includes('Safe') ? 'text-emerald-600' : isFlagged ? 'text-red-600' : 'text-slate-600'}">${sub.plagiarism || 'Not Checked'}</td>
                     <td class="py-4 text-right">
-                        <button onclick="alert('Viewing: ${sub.name}')" class="text-blue-600 hover:underline font-semibold text-sm">View Details</button>
+                        ${sub.file_name ? `<a href="http://127.0.0.1:8000/uploads/${sub.file_name}" target="_blank" class="px-3 py-1 ${isFlagged ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200'} rounded-md text-xs font-bold transition-all"><i class="fa-solid fa-file-pdf mr-1"></i>View File</a>` : `<span class="text-xs text-slate-400">N/A</span>`}
                     </td>
                 </tr>
-            `).join('');
+            `}).join('');
+            
+            renderSubmissionChart(); // Re-render if state changes dynamically
+        }
+
+        let submissionChartInstance = null;
+        function renderSubmissionChart() {
+            const subEl = document.getElementById('submissionChart');
+            if (subEl) {
+                if (submissionChartInstance) submissionChartInstance.destroy();
+                submissionChartInstance = new Chart(subEl.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'Pending', 'Late'],
+                        datasets: [{
+                            data: [submissions.length, pendingAssignments.length, 0], // simplified 0 for late as there's no strict tracking yet
+                            backgroundColor: ['#10B981', '#9CA3AF', '#EF4444'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: { responsive: true, cutout: '75%' }
+                });
+            }
+        }
+
+        // File Selection Visual Feedback
+        function onFileSelected() {
+            const fileInput = document.getElementById('assignmentFile');
+            const indicator = document.getElementById('fileSelectedIndicator');
+            const fileName = document.getElementById('selectedFileName');
+            const selectBtn = document.getElementById('selectFileBtn');
+            const dropZone = document.getElementById('uploadDropZone');
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                indicator.classList.remove('hidden');
+                indicator.classList.add('flex');
+                fileName.textContent = file.name;
+                selectBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-500"></i> Change File';
+                selectBtn.classList.add('bg-emerald-100', 'border', 'border-emerald-300');
+                selectBtn.classList.remove('bg-slate-200');
+                dropZone.classList.add('border-emerald-400');
+                dropZone.classList.remove('border-slate-200');
+            }
+        }
+
+        function clearFileSelection() {
+            const fileInput = document.getElementById('assignmentFile');
+            const indicator = document.getElementById('fileSelectedIndicator');
+            const selectBtn = document.getElementById('selectFileBtn');
+            const dropZone = document.getElementById('uploadDropZone');
+
+            fileInput.value = '';
+            indicator.classList.add('hidden');
+            indicator.classList.remove('flex');
+            selectBtn.innerHTML = '<i class="fa-solid fa-folder-open"></i> Select File';
+            selectBtn.classList.remove('bg-emerald-100', 'border', 'border-emerald-300');
+            selectBtn.classList.add('bg-slate-200');
+            dropZone.classList.remove('border-emerald-400');
+            dropZone.classList.add('border-slate-200');
         }
 
         async function submitAssignment() {
-            const title = document.getElementById('assignmentTitle').value.trim();
-            const assId = document.getElementById('assignmentTitle').dataset.id;
+            const dropdown = document.getElementById('assignmentSelect');
+            const fileInput = document.getElementById('assignmentFile');
+            const file = fileInput.files[0];
+            const submitBtn = document.getElementById('submitAssignmentBtn');
 
-            if (!title) return alert('Please select or specify assignment title');
+            const assignment_id = dropdown ? dropdown.value : '';
 
-            // In a real app we'd find the assignment_id properly
-            const assignment = allAssignments.find(a => a.title.toLowerCase() === title.toLowerCase()) || { assignment_id: 1 };
+            if (!assignment_id) return alert('Please select an assignment from the dropdown.');
+            if (!file) return alert('Please select a PDF file to upload.');
+
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
 
             try {
-                const response = await fetch('http://localhost:8000/api/submissions', {
+                const response = await fetch(`http://127.0.0.1:8000/api/assignments/upload?student_id=${currentUser.id || 1}&assignment_id=${assignment_id}`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        student_id: currentUser.id,
-                        assignment_id: assignment.assignment_id,
-                        submitted_file: "assignment_file.pdf"
-                    })
+                    body: formData
                 });
 
                 if (response.ok) {
-                    alert('Assignment uploaded successfully!');
-                    document.getElementById('assignmentTitle').value = '';
+                    // Show success message
+                    document.getElementById('uploadSuccess').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('uploadSuccess').classList.add('hidden'), 6000);
+
+                    // Clear file selection
+                    clearFileSelection();
+                    if (dropdown) dropdown.value = '';
+
+                    // Refresh data
                     fetchDashboardData();
-                    showSection('history');
                 } else {
                     const err = await response.json();
                     alert('Submission failed: ' + (err.detail || 'Unknown error'));
@@ -522,48 +768,131 @@
             } catch (error) {
                 console.error('Submission Error:', error);
                 alert('Connection to server failed.');
+            } finally {
+                submitBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Now';
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Record Submission Logic
+        function onRecordFileSelected() {
+            const fileInput = document.getElementById('recordFile');
+            const indicator = document.getElementById('recordFileSelected');
+            const fileName = document.getElementById('selectedRecordName');
+            const selectBtn = document.getElementById('selectRecordBtn');
+            const dropZone = document.getElementById('recordDropZone');
+
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                indicator.classList.remove('hidden');
+                indicator.classList.add('flex');
+                fileName.textContent = file.name;
+                selectBtn.innerHTML = '<i class="fa-solid fa-check text-emerald-500"></i> Change File';
+                selectBtn.classList.add('bg-emerald-100', 'border', 'border-emerald-300');
+                selectBtn.classList.remove('bg-slate-200');
+                dropZone.classList.add('border-emerald-400');
+                dropZone.classList.remove('border-slate-200');
+            }
+        }
+
+        function clearRecordSelection() {
+            const fileInput = document.getElementById('recordFile');
+            const indicator = document.getElementById('recordFileSelected');
+            const selectBtn = document.getElementById('selectRecordBtn');
+            const dropZone = document.getElementById('recordDropZone');
+
+            fileInput.value = '';
+            indicator.classList.add('hidden');
+            indicator.classList.remove('flex');
+            selectBtn.innerHTML = '<i class="fa-solid fa-file"></i> Choose File';
+            selectBtn.classList.remove('bg-emerald-100', 'border', 'border-emerald-300');
+            selectBtn.classList.add('bg-slate-200');
+            dropZone.classList.remove('border-emerald-400');
+            dropZone.classList.add('border-slate-200');
+        }
+
+        async function submitRecord() {
+            const fileInput = document.getElementById('recordFile');
+            const file = fileInput.files[0];
+            const submitBtn = document.getElementById('submitRecordBtn');
+
+            if (!file) return alert('Please select a file to upload as a Record.');
+
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            submitBtn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', file);
+            // Standalone record submission
+            const assignment_id = 999;
+
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/api/assignments/upload?student_id=${currentUser.id || 1}&assignment_id=${assignment_id}`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    document.getElementById('recordUploadSuccess').classList.remove('hidden');
+                    setTimeout(() => document.getElementById('recordUploadSuccess').classList.add('hidden'), 6000);
+                    clearRecordSelection();
+                    fetchDashboardData();
+                } else {
+                    const err = await response.json();
+                    alert('Record Submission failed: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Submission Error:', error);
+                alert('Connection to server failed.');
+            } finally {
+                submitBtn.innerHTML = '<i class="fa-solid fa-upload"></i> Upload';
+                submitBtn.disabled = false;
             }
         }
 
         // Timetable Logic
-        let timetable = JSON.parse(localStorage.getItem('studentTimetable')) || [
-            { day: 'Monday', time: '10:00 AM', subject: 'Data Structures', location: 'Lab 302' },
-            { day: 'Wednesday', time: '02:00 PM', subject: 'Database Systems', location: 'Hall A' }
-        ];
+        const timetableStoreKey = `studentTimetable_${currentUser.id || 'guest'}`;
+        let timetable = JSON.parse(localStorage.getItem(timetableStoreKey)) || [];
 
         function renderTimetable() {
             const body = document.getElementById('timetableBody');
-            body.innerHTML = timetable.map((entry, index) => `
-                <tr class="hover:bg-slate-50 transition-colors">
-                    <td class="p-4 border border-slate-200">${entry.day}</td>
-                    <td class="p-4 border border-slate-200 font-medium">${entry.time}</td>
-                    <td class="p-4 border border-slate-200">${entry.subject}</td>
-                    <td class="p-4 border border-slate-200 text-slate-500">${entry.location}</td>
-                    <td class="p-4 border border-slate-200 text-center">
-                        <div class="flex gap-2 justify-center">
-                            <button onclick="alert('Viewing: ${entry.subject} details')" class="p-2 text-blue-600 hover:bg-blue-50 rounded" title="View"><i class="fa-solid fa-eye"></i></button>
-                            <button onclick="deleteTimetableRow(${index})" class="p-2 text-red-500 hover:bg-red-50 rounded" title="Remove"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-            localStorage.setItem('studentTimetable', JSON.stringify(timetable));
+            if (timetable.length === 0) {
+                body.innerHTML = '<tr><td colspan="4" class="p-8 text-center text-slate-400 font-medium border border-slate-200">No schedule available. Add your first class!</td></tr>';
+            } else {
+                body.innerHTML = timetable.map((entry, index) => `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="p-4 border border-slate-200">${entry.day}</td>
+                        <td class="p-4 border border-slate-200 font-medium">${entry.time}</td>
+                        <td class="p-4 border border-slate-200">${entry.subject}</td>
+                        <td class="p-4 border border-slate-200 text-center">
+                            <div class="flex gap-2 justify-center">
+                                <button onclick="openTimetableAttachment(${index})" class="p-2 text-blue-600 hover:bg-blue-50 rounded" title="View"><i class="fa-solid fa-eye"></i></button>
+                                <button onclick="deleteTimetableRow(${index})" class="p-2 text-red-500 hover:bg-red-50 rounded" title="Remove"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            try {
+                localStorage.setItem(timetableStoreKey, JSON.stringify(timetable));
+            } catch (e) {
+                alert("Storage limit reached! This file might be too large to save in local storage.");
+                timetable.pop(); // remove the failed entry
+            }
         }
 
         function addTimetableRow() {
             const day = document.getElementById('ttDay').value;
             const time = document.getElementById('ttTime').value;
             const subject = document.getElementById('ttSubject').value;
-            const location = document.getElementById('ttLocation').value;
 
             if (!time || !subject) return alert('Time and Subject are required');
 
-            timetable.push({ day, time, subject, location });
+            timetable.push({ day, time, subject });
             renderTimetable();
 
             document.getElementById('ttTime').value = '';
             document.getElementById('ttSubject').value = '';
-            document.getElementById('ttLocation').value = '';
         }
 
         function deleteTimetableRow(index) {
@@ -571,20 +900,43 @@
             renderTimetable();
         }
 
+        function openTimetableAttachment(index) {
+            const entry = timetable[index];
+            if (entry && entry.fileUrl) {
+                fetch(entry.fileUrl)
+                    .then(res => res.blob())
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        window.open(url, '_blank');
+                    });
+            } else {
+                alert(`Viewing: ${entry.subject} details`);
+            }
+        }
+
         function handleTimetableUpload(event) {
             const file = event.target.files[0];
             if (file) {
-                alert(`Uploaded: ${file.name}. (File processing simulated - row added)`);
-                timetable.push({ day: 'Friday', time: '09:00 AM', subject: `Uploaded: ${file.name}`, location: 'Remote' });
-                renderTimetable();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    timetable.push({ 
+                        day: 'Friday', 
+                        time: '09:00 AM', 
+                        subject: `${file.name}`, 
+                        fileUrl: e.target.result
+                    });
+                    renderTimetable();
+                    alert(`Uploaded: ${file.name}. Click the eye icon to view!`);
+                };
+                reader.readAsDataURL(file);
             }
         }
 
         // Global Search Functionality
         const mockCourses = [
-            { id: 1, name: 'Data Structures', url: 'https://www.youtube.com/results?search_query=data+structures+course', status: 'available' },
-            { id: 2, name: 'Web Development', url: 'https://www.youtube.com/results?search_query=web+development+crash+course', status: 'completed' },
-            { id: 3, name: 'AI & Machine Learning', url: 'https://www.youtube.com/results?search_query=ai+ml+full+course', status: 'available' }
+            { id: 1, name: 'Data Structures', url: 'https://www.youtube.com/playlist?list=PLBlnK6fEyqRj9lld8sWIUNwlKfdUoPd1Y', status: 'available' },
+            { id: 2, name: 'Web Development', url: 'https://www.youtube.com/playlist?list=PLillGF-RfqbZTASqIvdZBgZ0ZsH42Ou', status: 'completed' },
+            { id: 3, name: 'AI & Machine Learning', url: 'https://www.youtube.com/playlist?list=PLoROMvodv4rMiGQp3WXShtY1Obj7qO0RL', status: 'available' }
         ];
 
         function handleGlobalSearch(event) {
@@ -656,6 +1008,33 @@
             { id: 1, sem: 'Fall 2025', courses: 'CS101, MATH202', gpa: '3.8', status: 'Reviewed' }
         ];
 
+        let gpaChartInstance = null;
+        function renderGPAChart() {
+            const gpaEl = document.getElementById('gpaChart');
+            if (gpaEl) {
+                if (gpaChartInstance) gpaChartInstance.destroy();
+                // Extract Semesters and GPAs from local array
+                const semLabels = results.length ? results.map(r => r.sem) : ['Sem 1'];
+                const semData = results.length ? results.map(r => parseFloat(r.gpa) || 0) : [0];
+                
+                gpaChartInstance = new Chart(gpaEl.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: semLabels,
+                        datasets: [{
+                            label: 'GPA',
+                            data: semData,
+                            borderColor: '#2563EB',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { min: 0, max: 4.0 } } }
+                });
+            }
+        }
+
         function renderResults() {
             const body = document.getElementById('resultsBody');
             body.innerHTML = results.map((r, i) => `
@@ -673,6 +1052,7 @@
                 </tr>
             `).join('');
             localStorage.setItem('studentResults', JSON.stringify(results));
+            renderGPAChart(); // Refresh chart on UI draw
         }
 
         function addResult() {
@@ -701,39 +1081,74 @@
             { id: 1, name: 'Full Stack Excellence', year: '2025', status: 'Badge Awarded' }
         ];
 
-        function renderCerts() {
-            const grid = document.getElementById('certificatesGrid');
-            grid.innerHTML = certificates.map(c => `
-                <div class="p-6 bg-yellow-50/50 border border-yellow-200 rounded-2xl flex flex-col items-center text-center group">
-                    <div class="w-16 h-16 bg-yellow-400 text-white rounded-full flex items-center justify-center text-3xl mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                        <i class="fa-solid fa-award"></i>
+        function renderNotifications(notifs) {
+            const warningsList = document.getElementById('warningsList');
+            if (warningsList && notifs.length > 0) {
+                warningsList.innerHTML = notifs.map(n => `
+                    <div class="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-4">
+                        <i class="fa-solid fa-triangle-exclamation text-red-500 text-xl mt-1"></i>
+                        <div>
+                            <h4 class="font-bold text-red-700">${n.title}</h4>
+                            <p class="text-sm text-red-600">${n.message}</p>
+                        </div>
                     </div>
-                    <h4 class="font-bold text-lg">${c.name}</h4>
-                    <p class="text-sm text-yellow-800 font-medium">Earned in ${c.year}</p>
-                    <div class="mt-4 flex gap-2">
-                        <span class="px-3 py-1 bg-white text-[10px] font-bold rounded-full border border-yellow-200">${c.status}</span>
-                        <button onclick="reviewItem('${c.name}')" class="text-yellow-600 hover:text-yellow-800"><i class="fa-solid fa-file-contract"></i></button>
-                    </div>
-                </div>
-            `).join('');
-            localStorage.setItem('studentCerts', JSON.stringify(certificates));
+                `).join('');
+                
+                // Also update bell icon indicator
+                const bellBadges = document.querySelectorAll('.fa-bell + span');
+                bellBadges.forEach(b => {
+                    b.classList.remove('hidden');
+                    b.classList.add('animate-pulse', 'scale-125');
+                });
+            } else if (warningsList) {
+                warningsList.innerHTML = '<p class="text-slate-500 p-4 border-2 border-dashed border-slate-200 rounded-xl text-center">No active warnings or upcoming deadlines.</p>';
+                const bellBadges = document.querySelectorAll('.fa-bell + span');
+                bellBadges.forEach(b => b.classList.add('hidden'));
+            }
         }
 
-        function addCertificate(event) {
-            const name = document.getElementById('certNameInput').value;
+        async function addCertificate(event) {
+            const name = document.getElementById('certNameInput').value.trim();
             const file = event.target.files[0];
-            if (name && file) {
-                certificates.push({ id: Date.now(), name: name, year: '2026', status: 'Review Pending' });
-                renderCerts();
-                document.getElementById('certNameInput').value = '';
-                alert('Achievement certificate uploaded for review!');
+            const btn = document.getElementById('uploadCertBtn');
+
+            if (!name) return alert('Please enter a certificate name.');
+            if (!file) return alert('Please select a file to upload.');
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('student_id', currentUser.id || 1);
+            formData.append('name', name);
+            formData.append('file', file);
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/certificates/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    alert('Achievement certificate uploaded successfully for review!');
+                    document.getElementById('certNameInput').value = '';
+                    event.target.value = '';
+                    fetchDashboardData();
+                } else {
+                    const err = await res.json();
+                    alert('Upload failed: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Upload Error:', error);
+                alert('Connection to server failed.');
+            } finally {
+                btn.innerHTML = 'Choose File';
+                btn.disabled = false;
             }
         }
 
         function markCourseComplete(name) {
-            alert(`Congratulations! Achievement Badge awarded for "${name}". Added to Certificates.`);
-            certificates.unshift({ id: Date.now(), name: name + ' Achievement', year: '2026', status: 'Course Completed' });
-            renderCerts();
+            alert(`Congratulations! Achievement Badge awarded for "${name}". Please upload your certificate.`);
         }
 
         // Record Submissions
@@ -745,7 +1160,7 @@
                         <div class="w-12 h-12 bg-red-50 text-red-500 rounded-xl flex items-center justify-center text-2xl shadow-inner"><i class="fa-solid fa-file-pdf"></i></div>
                         <div class="flex-1 min-w-0">
                             <h4 class="font-bold text-slate-800 truncate">${s.name}</h4>
-                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">Verified Soft Copy • ${s.date}</p>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-tight">${currentUser.name || 'Student'} • Verified Soft Copy • ${s.date}</p>
                         </div>
                     </div>
                     <div class="flex justify-between items-center px-1">
@@ -860,9 +1275,9 @@
                 const date = new Date();
                 date.setDate(day);
                 try {
-                    const res = await fetch('http://localhost:8000/api/tasks', {
+                    const res = await fetch('http://127.0.0.1:8000/api/tasks', {
                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             student_id: currentUser.id,
                             task_name: text,
@@ -881,41 +1296,6 @@
                 renderTasks();
             }
         });
-        // Chart JS Logics
-        const gpaEl = document.getElementById('gpaChart');
-        if (gpaEl) {
-            new Chart(gpaEl.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5'],
-                    datasets: [{
-                        label: 'GPA',
-                        data: [3.2, 3.4, 3.5, 3.8, 3.9],
-                        borderColor: '#2563EB',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { display: false } } }
-            });
-        }
-
-        const subEl = document.getElementById('submissionChart');
-        if (subEl) {
-            new Chart(subEl.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completed', 'Pending', 'Late'],
-                    datasets: [{
-                        data: [12, 3, 1],
-                        backgroundColor: ['#10B981', '#9CA3AF', '#EF4444'],
-                        borderWidth: 0
-                    }]
-                },
-                options: { responsive: true, cutout: '75%' }
-            });
-        }
 
         async function toggleTask(index) {
             tasks[index].completed = !tasks[index].completed;
@@ -923,7 +1303,7 @@
             const task = tasks[index];
             if (task.id) {
                 try {
-                    await fetch(`http://localhost:8000/api/tasks/${task.id}/toggle`, { method: 'PUT' });
+                    await fetch(`http://127.0.0.1:8000/api/tasks/${task.id}/toggle`, { method: 'PUT' });
                 } catch (err) {
                     console.error('Failed to toggle task in backend', err);
                 }
@@ -965,7 +1345,6 @@
         renderTimetable();
         renderTasks();
         renderResults();
-        renderCerts();
         renderRecords();
         renderWarnings();
         buildCalendar();

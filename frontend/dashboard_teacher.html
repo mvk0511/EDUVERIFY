@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard - EduVerify Admin</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="./static/js/chatbot.js" defer></script>
@@ -59,9 +59,9 @@
                 </div>
                 <div class="flex items-center gap-3 cursor-pointer group">
                     <img src="https://ui-avatars.com/api/?name=Teacher+User&background=10B981&color=fff" alt="Profile"
-                        class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-emerald-500 transition-all">
+                        id="headerAvatar" class="w-9 h-9 rounded-full ring-2 ring-transparent group-hover:ring-emerald-500 transition-all">
                     <div class="hidden sm:block">
-                        <p class="text-sm font-semibold">Prof. Teacher</p>
+                        <p class="text-sm font-semibold" id="headerName">Prof. Teacher</p>
                         <p class="text-xs text-slate-500">Computer Science Dept</p>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                     class="bg-emerald-600 text-white rounded-2xl p-8 relative overflow-hidden shadow-lg shadow-emerald-500/20">
                     <i class="fa-solid fa-chalkboard-user absolute -right-10 -bottom-10 text-9xl text-white/10"></i>
                     <h2 class="text-3xl font-bold mb-2">Teacher Admin Dashboard</h2>
-                    <p class="text-emerald-100 max-w-2xl text-lg mb-6">Monitor student submissions, evaluate plagiarism
+                    <p class="text-emerald-100 max-w-2xl text-lg mb-6" id="welcomeStats">Monitor student submissions, evaluate plagiarism
                         reports, and manage academic schedules with one unified interface.</p>
                 </div>
 
@@ -97,22 +97,30 @@
                 <!-- Create Assignment -->
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                     <h3 class="text-xl font-bold mb-6">Create New Assignment</h3>
-                    <form class="grid grid-cols-1 md:grid-cols-2 gap-6"
-                        onsubmit="event.preventDefault(); alert('Assignment broadcasted to all students!')">
+                    <div id="assignmentSuccess"
+                        class="hidden mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-semibold flex items-center gap-3">
+                        <i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>
+                        <span>Assignment broadcasted successfully! Students can now see it.</span>
+                    </div>
+                    <form id="createAssignmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-6"
+                        onsubmit="event.preventDefault(); broadcastAssignment()">
                         <div class="space-y-4">
-                            <input type="text" placeholder="Assignment Title"
+                            <input type="text" id="assignTitle" placeholder="Assignment Title" required
                                 class="w-full px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
-                            <select class="w-full px-4 py-2 border rounded-lg outline-none">
+                            <select id="assignSubject" class="w-full px-4 py-2 border rounded-lg outline-none">
                                 <option>Data Structures</option>
                                 <option>Web Development</option>
                                 <option>AI & Machine Learning</option>
                             </select>
-                            <input type="date" class="w-full px-4 py-2 border rounded-lg outline-none">
+                            <input type="date" id="assignDeadline"
+                                class="w-full px-4 py-2 border rounded-lg outline-none" required>
+                            <input type="file" id="assignQuestionsFile" accept=".pdf"
+                                class="w-full px-4 py-2 border rounded-lg outline-none text-slate-500" title="Upload Question PDF (Optional)">
                         </div>
                         <div class="space-y-4">
-                            <textarea placeholder="Instructions..."
+                            <textarea id="assignDescription" placeholder="Instructions..."
                                 class="w-full px-4 py-2 border rounded-lg h-32 outline-none"></textarea>
-                            <button type="submit"
+                            <button type="submit" id="broadcastBtn"
                                 class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold transition-all shadow-md shadow-emerald-500/20">Broadcast
                                 Assignment</button>
                         </div>
@@ -133,6 +141,7 @@
                                     <th class="p-4 font-bold">Roll ID</th>
                                     <th class="p-4 font-bold">Joined Date</th>
                                     <th class="p-4 font-bold">Status</th>
+                                    <th class="p-4 font-bold text-right">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="studentListBody"></tbody>
@@ -146,50 +155,83 @@
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-center mb-6">
                         <h2 class="text-2xl font-bold">Assignment Submission Reports</h2>
-                        <button onclick="exportToExcel()"
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all">
-                            <i class="fa-solid fa-file-excel"></i> Export All to Excel
-                        </button>
+                        <div class="flex gap-4">
+                            <button onclick="detectPlagiarism()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all">
+                                <i class="fa-solid fa-bolt"></i> Detect Plagiarism
+                            </button>
+                            <button onclick="exportToExcel()"
+                                class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-all">
+                                <i class="fa-solid fa-file-excel"></i> Export All to Excel
+                            </button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left" id="submissionsTable">
                             <thead class="bg-slate-50 border-b">
                                 <tr class="text-slate-600 text-sm">
-                                    <th class="p-4 font-bold">Student</th>
-                                    <th class="p-4 font-bold">Assignment</th>
+                                    <th class="p-4 font-bold">Submission ID</th>
+                                    <th class="p-4 font-bold">Student Name</th>
+                                    <th class="p-4 font-bold">File Name</th>
                                     <th class="p-4 font-bold">Date</th>
-                                    <th class="p-4 font-bold">Status</th>
-                                    <th class="p-4 font-bold">Similarity Status</th>
+                                    <th class="p-4 font-bold">Plagiarism Status</th>
+                                    <th class="p-4 font-bold">Score</th>
                                     <th class="p-4 font-bold">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="submissionReportsBody"></tbody>
                         </table>
                     </div>
+
+
                 </div>
             </div>
 
             <!-- Section 4: Schedule (Calendar) -->
             <div id="section-schedule" class="hidden space-y-6">
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <div class="lg:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                        <h3 class="text-xl font-bold mb-6">Class Schedule</h3>
-                        <div
-                            class="grid grid-cols-7 gap-2 mb-4 text-center font-bold text-slate-400 text-xs uppercase tracking-widest">
-                            <div>Sun</div>
-                            <div>Mon</div>
-                            <div>Tue</div>
-                            <div>Wed</div>
-                            <div>Thu</div>
-                            <div>Fri</div>
-                            <div>Sat</div>
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Event Form Card -->
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                            <h3 class="text-xl font-bold mb-4 text-emerald-600">Add Schedule Event</h3>
+                            <div class="flex flex-col md:flex-row gap-4">
+                                <input type="text" id="schedEventTitle" placeholder="Event Title (e.g. Exam Review)"
+                                    class="flex-1 p-2 border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-emerald-500">
+                                <input type="number" id="schedEventDay" min="1" max="31" value="15"
+                                    class="w-24 p-2 border border-slate-200 rounded-lg outline-none text-center" title="Day of Month">
+                                <button onclick="addTeacherEvent()"
+                                    class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-bold hover:bg-emerald-700 transition-all shadow-md">
+                                    <i class="fa-solid fa-plus mr-1"></i>Add
+                                </button>
+                            </div>
                         </div>
-                        <div id="calendarDays" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+
+                        <!-- Calendar Grid Card -->
+                        <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+                            <div class="flex justify-between items-center mb-6">
+                                <h3 class="text-xl font-bold">Class Calendar</h3>
+                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest" id="currentMonthYear">March 2026</p>
+                            </div>
+                            <div
+                                class="grid grid-cols-7 gap-2 mb-4 text-center font-bold text-slate-400 text-[10px] uppercase tracking-widest">
+                                <div>Sun</div>
+                                <div>Mon</div>
+                                <div>Tue</div>
+                                <div>Wed</div>
+                                <div>Thu</div>
+                                <div>Fri</div>
+                                <div>Sat</div>
+                            </div>
+                            <div id="calendarDays" class="grid grid-cols-7 gap-2 text-center text-sm"></div>
+                        </div>
                     </div>
-                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
+
+                    <!-- Agenda Panel -->
+                    <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full">
                         <h3 class="text-xl font-bold mb-4">Day Agenda</h3>
-                        <ul id="agendaList" class="space-y-4 text-slate-600 text-sm">
-                            <li class="p-3 bg-slate-50 rounded-lg italic">Select a date to view classes...</li>
+                        <p class="text-xs text-slate-400 mb-6 italic" id="agendaHeader">Select a date to view events...</p>
+                        <ul id="agendaList" class="space-y-4 text-slate-600 text-sm overflow-y-auto flex-1">
+                            <li class="p-4 bg-slate-50 rounded-xl text-center border-2 border-dashed border-slate-100 italic">No date selected.</li>
                         </ul>
                     </div>
                 </div>
@@ -198,19 +240,48 @@
             <!-- Section 5: Timetable -->
             <div id="section-timetable" class="hidden space-y-6">
                 <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200">
-                    <h2 class="text-2xl font-bold mb-6">Staff Timetable</h2>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="bg-slate-50 border-b">
-                                <tr class="text-slate-600 text-sm">
-                                    <th class="p-4 font-bold">Day</th>
-                                    <th class="p-4 font-bold">Time</th>
-                                    <th class="p-4 font-bold">Subject</th>
-                                    <th class="p-4 font-bold">Hall / Lab</th>
+                    <div class="flex justify-between items-center mb-8">
+                        <h2 class="text-2xl font-bold">Staff Timetable</h2>
+                        <div class="flex gap-4">
+                            <button onclick="document.getElementById('timetableUpload').click()"
+                                class="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg font-semibold hover:bg-emerald-200 transition-all">
+                                <i class="fa-solid fa-upload mr-2"></i>Upload Timetable
+                            </button>
+                            <input type="file" id="timetableUpload" class="hidden"
+                                onchange="handleTimetableUpload(event)">
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto mb-8">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 text-slate-600 text-sm">
+                                    <th class="p-4 border border-slate-200 font-bold">Day</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Time</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Subject / Activity</th>
+                                    <th class="p-4 border border-slate-200 font-bold">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="teacherTimetableBody"></tbody>
                         </table>
+                    </div>
+                    <div id="timetableAddForm"
+                        class="p-6 bg-slate-50 rounded-xl border border-slate-200 grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <select id="ttDay" class="p-2 border rounded-lg outline-none">
+                            <option>Monday</option>
+                            <option>Tuesday</option>
+                            <option>Wednesday</option>
+                            <option>Thursday</option>
+                            <option>Friday</option>
+                            <option>Saturday</option>
+                        </select>
+                        <input type="text" id="ttTime" placeholder="Time (e.g. 10:00 AM)"
+                            class="p-2 border rounded-lg outline-none">
+                        <input type="text" id="ttSubject" placeholder="Subject"
+                            class="p-2 border rounded-lg outline-none">
+                        <button onclick="addTimetableRow()"
+                            class="md:col-span-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-lg transition-all">
+                            <i class="fa-solid fa-plus mr-2"></i>Add Entry
+                        </button>
                     </div>
                 </div>
             </div>
@@ -221,49 +292,139 @@
     <!-- Floating Chatbot Embed Container -->
     <div id="chatbot-container"></div>
 
+    <!-- Plagiarism Result Modal -->
+    <div id="plagiarismModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 modal-backdrop">
+        <div class="bg-white w-full max-w-5xl max-h-[90vh] rounded-3xl shadow-2xl overflow-hidden flex flex-col modal-content">
+            <!-- Modal Header -->
+            <div class="p-6 border-b flex justify-between items-center bg-slate-50">
+                <div>
+                    <h3 class="text-xl font-bold text-slate-800" id="modalTitle">Plagiarism Detailed Report</h3>
+                    <p class="text-xs text-slate-500 mt-1" id="modalSubtitle">Deep-scan AI comparison results</p>
+                </div>
+                <button onclick="closePlagiarismModal()" class="w-10 h-10 rounded-full hover:bg-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 transition-all">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            
+            <!-- Modal Body -->
+            <div class="p-6 overflow-y-auto flex-1 bg-white">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-50 border-b">
+                            <tr class="text-slate-600 text-xs uppercase font-bold tracking-wider">
+                                <th class="p-4">Student 1</th>
+                                <th class="p-4">Student 2</th>
+                                <th class="p-4 text-center">Similarity</th>
+                                <th class="p-4 text-center">Status</th>
+                                <th class="p-4 text-right">Verification</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modalResultsBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Modal Footer -->
+            <div class="p-6 border-t bg-slate-50 flex justify-end gap-3">
+                <button onclick="closePlagiarismModal()" class="px-6 py-2 bg-white border border-slate-200 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all">Close Report</button>
+                <button onclick="exportToExcel()" class="px-6 py-2 bg-emerald-600 text-white rounded-xl font-bold text-sm hover:bg-emerald-700 shadow-lg shadow-emerald-500/20 transition-all">Export as CSV</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Session Management
         const currentUser = JSON.parse(localStorage.getItem('currentUser')) || { name: 'Professor', id: 0 };
-        document.querySelector('p.text-sm.font-semibold').innerText = `Prof. ${currentUser.name}`;
+        const hdrName = document.getElementById('headerName');
+        const hdrAvatar = document.getElementById('headerAvatar');
+        if (hdrName) hdrName.innerText = `Prof. ${currentUser.name}`;
+        if (hdrAvatar) hdrAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=10B981&color=fff`;
 
         // Data Management with API
         let studentsList = [];
         let submissions = [];
 
-        const teacherTimetable = [
-            { day: 'Monday', time: '10:00 AM', subject: 'Data Structures', location: 'Hall A' },
-            { day: 'Tuesday', time: '02:00 PM', subject: 'AI Lab', location: 'Lab 2' },
-            { day: 'Wednesday', time: '11:00 AM', subject: 'Web Dev', location: 'Hall C' }
+        let teacherTasks = JSON.parse(localStorage.getItem('teacherTasks')) || [
+            { text: 'Grade Midterms', completed: false, dateIdx: 15 },
+            { text: 'Department Meeting', completed: false, dateIdx: 15 },
+            { text: 'Review Student Portfolios', completed: false, dateIdx: 20 }
         ];
 
-        const classes = [
-            { dateIdx: 10, title: 'Algorithms Seminar' },
-            { dateIdx: 12, title: 'Department Meeting' },
-            { dateIdx: 15, title: 'Viva Voice Exam' }
+        let timetableData = JSON.parse(localStorage.getItem('teacherTimetable')) || [
+            { day: 'Monday', time: '09:00 AM', subject: 'Data Structures' },
+            { day: 'Wednesday', time: '11:00 AM', subject: 'Machine Learning' }
         ];
 
         async function fetchTeacherData() {
             try {
                 // Fetch Students
-                const stuRes = await fetch('http://localhost:8000/api/students');
+                const stuRes = await fetch('http://127.0.0.1:8000/api/students');
                 if (stuRes.ok) {
                     studentsList = await stuRes.json();
                     renderStudents();
                 }
 
                 // Fetch Submissions
-                const subRes = await fetch('http://localhost:8000/api/submissions');
+                const subRes = await fetch('http://127.0.0.1:8000/api/submissions');
                 if (subRes.ok) {
                     submissions = await subRes.json();
-                    // Enrichment: simplify plagiarism display if not already simplified by backend
-                    submissions = submissions.map(s => ({
-                        ...s,
-                        display_plagiarism: s.plagiarism_score > 40 ? `High (${s.plagiarism_score}%)` : `Safe (${s.plagiarism_score}%)`
-                    }));
                     renderSubmissionReports();
+                    
+                    // Update Welcome Stats
+                    const welcomeStats = document.getElementById('welcomeStats');
+                    if (welcomeStats) {
+                        welcomeStats.innerText = `You have ${submissions.length} submission${submissions.length !== 1 ? 's' : ''} to review.`;
+                    }
+
+                    if (typeof renderCharts === 'function') renderCharts();
                 }
             } catch (err) {
                 console.error('Teacher API Error:', err);
+            }
+        }
+
+        async function broadcastAssignment() {
+            const title = document.getElementById('assignTitle').value.trim();
+            const subject = document.getElementById('assignSubject').value;
+            const deadline = document.getElementById('assignDeadline').value;
+            const description = document.getElementById('assignDescription').value.trim();
+            const fileInput = document.getElementById('assignQuestionsFile');
+            const file = fileInput ? fileInput.files[0] : null;
+            const btn = document.getElementById('broadcastBtn');
+
+            if (!title || !deadline) return alert('Please fill in Title and Deadline.');
+
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Broadcasting...';
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('teacher_id', currentUser.id || 1);
+            formData.append('title', title);
+            formData.append('subject', subject);
+            formData.append('description', description || 'No instructions provided.');
+            formData.append('deadline', new Date(deadline).toISOString());
+            if (file) formData.append('question_pdf', file);
+
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/assignments', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    document.getElementById('assignmentSuccess').classList.remove('hidden');
+                    document.getElementById('createAssignmentForm').reset();
+                    setTimeout(() => document.getElementById('assignmentSuccess').classList.add('hidden'), 5000);
+                } else {
+                    const err = await res.json();
+                    alert('Failed: ' + (err.detail || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Broadcast Error:', error);
+                alert('Failed to connect to server.');
+            } finally {
+                btn.innerHTML = 'Broadcast Assignment';
+                btn.disabled = false;
             }
         }
 
@@ -280,103 +441,403 @@
             activeNav.classList.add('bg-emerald-600', 'text-white', 'border-l-4', 'border-emerald-400');
             activeNav.classList.remove('hover:bg-slate-800', 'hover:text-white');
         }
+        
+        // Student Drill-down Logic
+        function viewStudentSubmissions(studentName) {
+            showSection('submissions');
+            const searchInput = document.getElementById('teacherSearch');
+            searchInput.value = studentName;
+            handleTeacherSearch({ target: { value: studentName } });
+        }
 
         // Render Student List
         function renderStudents() {
             const body = document.getElementById('studentListBody');
-            body.innerHTML = studentsList.map(s => `
+            body.innerHTML = studentsList.map(s => {
+                const isOnline = s.last_login !== 'Never';
+                const statusColor = isOnline ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500';
+                const statusText = isOnline ? 'Active' : 'Offline';
+                
+                return `
                 <tr class="hover:bg-slate-50 border-b transition-colors whitespace-nowrap">
                     <td class="p-4 font-bold text-slate-800">${s.name}</td>
                     <td class="p-4 text-slate-500">${s.email}</td>
                     <td class="p-4 font-mono font-bold">${s.student_id ? 'CS' + s.student_id.toString().padStart(3, '0') : 'N/A'}</td>
                     <td class="p-4 font-medium">${new Date(s.registration_date).toLocaleDateString()}</td>
-                    <td class="p-4"><span class="px-2 py-1 text-xs font-bold rounded bg-emerald-100 text-emerald-700">Active</span></td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 text-[10px] font-bold uppercase rounded ${statusColor}">${statusText}</span>
+                        <div class="text-[10px] text-slate-400 mt-1">${isOnline ? 'Last Logged In:' : 'No Activity'}</div>
+                        <div class="text-xs font-medium text-slate-600">${s.last_login}</div>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="viewStudentSubmissions('${s.name}')" class="px-3 py-1 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-md text-xs font-bold transition-colors">
+                            <i class="fa-solid fa-folder-open mr-1"></i>View Submissions
+                        </button>
+                    </td>
                 </tr>
-            `).join('');
+            `}).join('');
         }
+
 
         // Render Submissions
         function renderSubmissionReports() {
             const body = document.getElementById('submissionReportsBody');
-            body.innerHTML = submissions.map(s => `
+            if (!submissions || submissions.length === 0) {
+                body.innerHTML = '<tr><td colspan="7" class="p-8 text-center text-slate-400"><i class="fa-solid fa-inbox text-4xl mb-3 block"></i>No submissions yet. Students need to upload assignments first.</td></tr>';
+                return;
+            }
+            body.innerHTML = submissions.map(s => {
+                const score = s.plagiarism_score !== undefined ? s.plagiarism_score : (s.score !== undefined ? s.score : null);
+                const hasScore = score !== null && score > 0;
+                const scoreColor = hasScore ? (score > 60 ? 'bg-red-100 text-red-700' : score > 30 ? 'bg-yellow-100 text-yellow-700' : 'bg-emerald-100 text-emerald-700') : 'bg-slate-100 text-slate-500';
+                const scoreText = hasScore ? `${score.toFixed(1)}%` : 'Not Checked';
+                
+                // Clicking the score will filter plagiarism results for this specific file
+                const scoreAction = hasScore ? `onclick="openPlagiarismModalByFile('${s.file_name || s.name}')"` : '';
+                const cursorStyle = hasScore ? 'cursor-pointer hover:scale-105 transition-transform' : '';
+
+                return `
                 <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
-                    <td class="p-4 font-bold text-emerald-600">${s.student || 'Unknown Student'}</td>
-                    <td class="p-4 font-medium">${s.name}</td>
-                    <td class="p-4 text-slate-500 text-sm">${s.date}</td>
-                    <td class="p-4"><span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-[10px] font-bold uppercase">${s.status}</span></td>
-                    <td class="p-4"><span class="px-2 py-1 ${s.display_plagiarism.includes('High') ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'} rounded text-[10px] font-bold">${s.display_plagiarism}</span></td>
-                    <td class="p-4"><button onclick="alert('Viewing document for ${s.student}...') " class="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-500 transition-all"><i class="fa-solid fa-eye"></i></button></td>
+                    <td class="p-4 font-mono text-xs">${s.submission_id}</td>
+                    <td class="p-4 font-bold text-emerald-600">${s.student_name || s.student || 'Unknown'}</td>
+                    <td class="p-4 font-medium text-sm truncate max-w-xs" title="${s.file_name || s.name || ''}">${s.file_name || s.name || 'N/A'}</td>
+                    <td class="p-4 text-slate-500 text-xs">${s.upload_date || s.date || 'N/A'}</td>
+                    <td class="p-4">
+                        <span class="px-2 py-1 ${s.status === 'flagged' ? 'bg-red-100 text-red-700 blink-warning' : 'bg-emerald-100 text-emerald-700'} rounded text-[10px] font-bold uppercase">
+                            ${s.status === 'flagged' ? 'High Plagiarism' : 'OK'}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        <span ${scoreAction} class="px-2 py-1 ${scoreColor} ${cursorStyle} rounded text-[10px] font-bold" title="${hasScore ? 'Click to view matches' : 'Run detection to see score'}">
+                            ${scoreText}
+                        </span>
+                    </td>
+                    <td class="p-4">
+                        ${(s.file_name || s.name) ? `<a href="http://127.0.0.1:8000/uploads/${s.file_name || s.name}" target="_blank" title="View PDF" class="p-2 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-emerald-500 transition-all"><i class="fa-solid fa-file-pdf"></i></a>` : '<span class="text-xs text-slate-400">No PDF</span>'}
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        async function detectPlagiarism() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Running AI Engine...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('http://127.0.0.1:8000/api/submissions/detect-plagiarism');
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Show inline success notification
+                    showDetectionToast(`✅ Analysis Complete! ${data.results?.length || 0} comparisons made across ${data.total_submissions || 0} submissions.`);
+
+                    // Render plagiarism comparison results table
+                    renderPlagiarismResults(data.results);
+
+                    // Re-fetch submissions to show updated plagiarism scores
+                    await fetchSubmissionsWithScores();
+                } else {
+                    showDetectionToast('⚠️ ' + (data.message || 'Plagiarism detection failed.'), true);
+                }
+            } catch (error) {
+                console.error('API Error:', error);
+                showDetectionToast('❌ Failed to connect to plagiarism engine. Is the backend running?', true);
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        function showDetectionToast(message, isError = false) {
+            // Remove existing toast
+            const existing = document.getElementById('detectionToast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'detectionToast';
+            toast.className = `fixed top-20 right-6 z-50 p-4 rounded-xl shadow-2xl font-semibold text-sm max-w-md transition-all transform translate-x-0 ${isError ? 'bg-red-50 border border-red-200 text-red-700' : 'bg-emerald-50 border border-emerald-200 text-emerald-700'
+                }`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 6000);
+        }
+
+        // Fetch submissions WITH plagiarism scores (from /api/submissions which joins tables)
+        async function fetchSubmissionsWithScores() {
+            try {
+                const res = await fetch('http://127.0.0.1:8000/api/submissions');
+                if (res.ok) {
+                    submissions = await res.json();
+                    renderSubmissionReports();
+                }
+            } catch (err) {
+                console.error('Error refreshing submissions:', err);
+            }
+        }
+
+        let lastPlagiarismResults = [];
+
+        function renderPlagiarismResults(results) {
+            lastPlagiarismResults = results || [];
+            openPlagiarismModal();
+        }
+
+        function openPlagiarismModal() {
+            const modal = document.getElementById('plagiarismModal');
+            const body = document.getElementById('modalResultsBody');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => modal.classList.add('modal-active'), 10);
+
+            if (!lastPlagiarismResults || lastPlagiarismResults.length === 0) {
+                body.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-400">No plagiarism matches found in the recent scan.</td></tr>';
+                return;
+            }
+
+            body.innerHTML = lastPlagiarismResults.map(r => `
+                <tr class="border-b border-slate-100 hover:bg-slate-50 transition-colors">
+                    <td class="p-4 text-xs">
+                        <span class="block font-bold text-slate-800">${r.student1_name || 'Unknown'}</span>
+                        <span class="block text-slate-400 text-[10px]">${r.file1}</span>
+                    </td>
+                    <td class="p-4 text-xs">
+                        <span class="block font-bold text-slate-800">${r.student2_name || 'Unknown'}</span>
+                        <span class="block text-slate-400 text-[10px]">${r.file2}</span>
+                    </td>
+                    <td class="p-4 text-center">
+                        <div class="flex flex-col items-center">
+                            <span class="text-sm font-extrabold text-blue-600">${r.similarity}%</span>
+                            <span class="text-[9px] text-slate-400">TF-IDF: ${r.tfidf_score}%</span>
+                        </div>
+                    </td>
+                    <td class="p-4 text-center">
+                        <span class="px-2 py-1 rounded text-[10px] font-bold uppercase 
+                            ${r.status === 'High Plagiarism' ? 'bg-red-100 text-red-700' :
+                              r.status === 'Medium Similarity' ? 'bg-yellow-100 text-yellow-700' :
+                              'bg-emerald-100 text-emerald-700'}">
+                            ${r.status}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <div class="flex justify-end gap-2">
+                            <a href="http://127.0.0.1:8000/uploads/${r.file1}" target="_blank" class="w-8 h-8 bg-slate-100 flex items-center justify-center rounded-lg text-red-500 hover:bg-white shadow-sm border border-slate-200 transition-all" title="View Doc 1"><i class="fa-solid fa-file-pdf text-xs"></i></a>
+                            <a href="http://127.0.0.1:8000/uploads/${r.file2}" target="_blank" class="w-8 h-8 bg-slate-100 flex items-center justify-center rounded-lg text-red-500 hover:bg-white shadow-sm border border-slate-200 transition-all" title="View Doc 2"><i class="fa-solid fa-file-pdf text-xs"></i></a>
+                            <button onclick="navigateToDetail('${r.file1}', '${r.file2}', ${r.similarity || 0}, ${r.tfidf_score || 0}, ${r.semantic_score || 0}, '${r.status}')" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-[10px] font-bold hover:bg-blue-700 transition-all ml-2">Compare</button>
+                        </div>
+                    </td>
                 </tr>
             `).join('');
         }
 
-        // Render Timetable
-        function renderTimetable() {
+        function openPlagiarismModalByFile(fileName) {
+            // Re-render and show modal
+            openPlagiarismModal();
+            
+            // Highlight relevant rows or filter (optional)
+            const rows = document.querySelectorAll('#modalResultsBody tr');
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                if (text.includes(fileName.toLowerCase())) {
+                    row.classList.add('bg-blue-50');
+                    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    row.classList.remove('bg-blue-50');
+                }
+            });
+        }
+
+        function closePlagiarismModal() {
+            const modal = document.getElementById('plagiarismModal');
+            modal.classList.remove('modal-active');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function navigateToDetail(f1, f2, score, tfidf, semantic, status) {
+            // Find a valid subId for report generation (optional, can be improved)
+            const sub = submissions.find(s => s.file_name === f1) || { submission_id: 1 };
+            const params = new URLSearchParams({
+                file1: f1,
+                file2: f2,
+                score: score,
+                tfidf: tfidf,
+                semantic: semantic,
+                status: status,
+                subId: sub.submission_id
+            });
+            window.location.href = `plagiarism-results.html?${params.toString()}`;
+        }
+
+        function renderTeacherTimetable() {
             const body = document.getElementById('teacherTimetableBody');
-            body.innerHTML = teacherTimetable.map(row => `
-                <tr class="hover:bg-slate-50 border-b border-slate-50 transition-colors">
-                    <td class="p-4 font-bold">${row.day}</td>
-                    <td class="p-4 font-medium text-emerald-600">${row.time}</td>
-                    <td class="p-4">${row.subject}</td>
-                    <td class="p-4 font-bold text-slate-400">${row.location}</td>
-                </tr>
-            `).join('');
+            if (body) {
+                body.innerHTML = timetableData.map((row, index) => `
+                    <tr class="hover:bg-slate-50 border-b transition-colors whitespace-nowrap group">
+                        <td class="p-4 font-bold text-slate-800">${row.day}</td>
+                        <td class="p-4 font-mono font-medium text-emerald-600">${row.time}</td>
+                        <td class="p-4 text-slate-600">${row.subject}</td>
+                        <td class="p-4 text-right opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="deleteTimetableRow(${index})" class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-500 hover:text-white transition-all"><i class="fa-solid fa-trash"></i></button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+            localStorage.setItem('teacherTimetable', JSON.stringify(timetableData));
         }
 
-        // Calendar Logic
+        function addTimetableRow() {
+            const day = document.getElementById('ttDay').value;
+            const time = document.getElementById('ttTime').value;
+            const sub = document.getElementById('ttSubject').value;
+
+            if (time && sub) {
+                timetableData.push({ day: day, time: time, subject: sub });
+                renderTeacherTimetable();
+                document.getElementById('ttTime').value = '';
+                document.getElementById('ttSubject').value = '';
+            } else {
+                alert('Please fill out Time and Subject.');
+            }
+        }
+
+        function deleteTimetableRow(idx) {
+            timetableData.splice(idx, 1);
+            renderTeacherTimetable();
+        }
+
+        function handleTimetableUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                alert('Uploaded ' + file.name + ' successfully. Timetable updated from file.');
+                timetableData.unshift({ day: 'Monday', time: '10:00 AM', subject: 'Imported Class: ' + file.name.split('.')[0] });
+                renderTeacherTimetable();
+            }
+        }
+
+        let selectedCalendarDay = null;
+
+        function addTeacherEvent() {
+            const title = document.getElementById('schedEventTitle').value.trim();
+            const day = parseInt(document.getElementById('schedEventDay').value);
+            
+            if (title && day) {
+                teacherTasks.push({ text: title, dateIdx: day, completed: false });
+                localStorage.setItem('teacherTasks', JSON.stringify(teacherTasks));
+                document.getElementById('schedEventTitle').value = '';
+                
+                buildCalendar();
+                if (selectedCalendarDay === day) selectDate(day);
+                
+                showDetectionToast(`<i class="fa-solid fa-calendar-plus mr-2"></i> Event added for Day ${day}!`);
+            } else {
+                alert('Please provide an event title.');
+            }
+        }
+
+        function deleteTeacherEvent(indexInTasks) {
+            const day = teacherTasks[indexInTasks].dateIdx;
+            teacherTasks.splice(indexInTasks, 1);
+            localStorage.setItem('teacherTasks', JSON.stringify(teacherTasks));
+            
+            buildCalendar();
+            if (selectedCalendarDay === day) selectDate(day);
+        }
+
         function buildCalendar() {
             const daysContainer = document.getElementById('calendarDays');
             const date = new Date();
-            const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+            const year = date.getFullYear();
+            const month = date.getMonth();
+            
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const lastDateOfMonth = new Date(year, month + 1, 0).getDate();
+            const lastDateOfPrevMonth = new Date(year, month, 0).getDate();
+
+            const monthYearEl = document.getElementById('currentMonthYear');
+            if(monthYearEl) monthYearEl.innerText = date.toLocaleString('default', { month: 'long', year: 'numeric' });
 
             let html = '';
-            for (let i = 0; i < 2; i++) html += `<div class="p-2 text-slate-200">28</div>`;
-            for (let i = 1; i <= lastDay; i++) {
+            
+            for (let i = firstDayOfMonth; i > 0; i--) {
+                html += `<div class="p-3 text-slate-200 text-xs font-bold ring-1 ring-slate-50 bg-slate-50/20">${lastDateOfPrevMonth - i + 1}</div>`;
+            }
+
+            for (let i = 1; i <= lastDateOfMonth; i++) {
                 const isToday = i === date.getDate();
-                const hasEvent = classes.some(c => c.dateIdx === i);
+                const hasTask = teacherTasks.some(t => t.dateIdx === i);
+                const isSelected = selectedCalendarDay === i;
+                
                 html += `
-                    <div class="p-4 cursor-pointer hover:bg-emerald-100 rounded-2xl relative transition-all ${isToday ? 'bg-emerald-600 text-white font-bold scale-110 shadow-lg shadow-emerald-500/20' : 'bg-white border border-slate-100'}" onclick="selectDate(${i})">
+                    <div class="p-3 cursor-pointer hover:bg-emerald-50 relative group rounded-lg transition-all ring-1 ring-slate-50
+                        ${isToday ? 'bg-emerald-600 text-white font-extrabold shadow-md z-10' : 'bg-white'} 
+                        ${isSelected && !isToday ? 'ring-2 ring-emerald-500 scale-105 z-10' : ''}" 
+                        onclick="selectDate(${i})">
                         ${i}
-                        ${hasEvent ? '<span class="absolute bottom-2 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-red-500 rounded-full"></span>' : ''}
+                        ${hasTask ? `<span class="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 ${isToday ? 'bg-white' : 'bg-red-500'} rounded-full ring-2 ring-white"></span>` : ''}
                     </div>`;
             }
-            daysContainer.innerHTML = html;
+            if (daysContainer) daysContainer.innerHTML = html;
         }
 
         function selectDate(day) {
-            const agenda = document.getElementById('agendaList');
-            const dayEvents = classes.filter(e => e.dateIdx === day);
-            agenda.innerHTML = dayEvents.length ? dayEvents.map(e => `
-                <li class="p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-lg flex items-center justify-between">
-                    <div><p class="font-bold text-emerald-900">${e.title}</p><p class="text-xs text-emerald-600">Scheduled for 10:00 AM</p></div>
-                    <i class="fa-solid fa-bell text-emerald-400"></i>
-                </li>
-            `).join('') : '<li class="p-4 bg-slate-50 rounded-lg text-slate-400 text-center border-2 border-dashed">No events for this date</li>';
+            selectedCalendarDay = day;
+            const list = document.getElementById('agendaList');
+            const header = document.getElementById('agendaHeader');
+            
+            const dayTasks = teacherTasks.map((t, i) => ({ ...t, originalIndex: i })).filter(t => t.dateIdx === day);
+            
+            if (header) {
+                const dateHeaderObj = new Date();
+                dateHeaderObj.setDate(day);
+                header.innerHTML = `Showing events for <strong>${day} ${dateHeaderObj.toLocaleString('default', { month: 'long' })}</strong>`;
+            }
+            
+            if (list) {
+                list.innerHTML = dayTasks.length ? dayTasks.map(t => `
+                    <li class="p-4 bg-emerald-50/50 border border-emerald-100 rounded-xl group relative hover:translate-x-1 transition-all">
+                        <div class="flex items-start gap-3">
+                            <i class="fa-solid fa-calendar-check text-emerald-500 mt-1"></i>
+                            <div class="flex-1">
+                                <p class="font-bold text-slate-800">${t.text}</p>
+                                <p class="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Scheduled for Day ${day}</p>
+                            </div>
+                            <button onclick="deleteTeacherEvent(${t.originalIndex})" class="w-8 h-8 rounded-full hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all opacity-0 group-hover:opacity-100">
+                                <i class="fa-solid fa-trash-can text-xs"></i>
+                            </button>
+                        </div>
+                    </li>
+                `).join('') : '<li class="p-8 bg-slate-50 rounded-2xl text-center border-2 border-dashed border-slate-100 italic text-slate-400 mt-4">You have no events scheduled for this day.</li>';
+            }
+            
+            buildCalendar();
         }
 
-        function handleTeacherSearch(e) {
+        function handleTeacherSearch(event) {
             const query = e.target.value.toLowerCase().trim();
 
             // Filter Students
             const studentRows = document.querySelectorAll('#studentListBody tr');
             studentRows.forEach(row => {
-                const text = row.innerText.toLowerCase();
+                const text = (row.innerText || '').toLowerCase();
                 row.style.display = text.includes(query) ? '' : 'none';
             });
 
             // Filter Submissions
             const submissionRows = document.querySelectorAll('#submissionReportsBody tr');
             submissionRows.forEach(row => {
-                const text = row.innerText.toLowerCase();
+                const text = (row.innerText || '').toLowerCase();
                 row.style.display = text.includes(query) ? '' : 'none';
             });
         }
 
         // Export to Excel (CSV Implementation with Quoting)
         function exportToExcel() {
-            let csv = '"Student","Assignment","Date","Status","Similarity Status"\n';
+            let csv = '"Student","Assignment","Date","Status","Similarity Score"\n';
             submissions.forEach(s => {
-                csv += `"${s.student || 'Unknown'}","${s.name}","${s.date}","${s.status}","${s.display_plagiarism}"\n`;
+                const score = s.plagiarism_score !== undefined ? s.plagiarism_score : (s.score !== undefined ? s.score : 'N/A');
+                const scoreText = score !== 'N/A' ? `${score}%` : score;
+                csv += `"${s.student_name || s.student || 'Unknown'}","${s.file_name || s.name || 'Unknown'}","${s.upload_date || s.date || 'Unknown'}","${s.status || 'Unknown'}","${scoreText}"\n`;
             });
 
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -391,14 +852,37 @@
         }
 
         // Charts
-        window.addEventListener('load', () => {
+        let pieChartInstance = null;
+        let barChartInstance = null;
+        
+        function renderCharts() {
+            let safe = 0, suspected = 0, flagged = 0;
+            const datesMap = {};
+            
+            submissions.forEach(s => {
+                const score = s.plagiarism_score !== undefined ? s.plagiarism_score : (s.score || 0);
+                if (score <= 30) safe++;
+                else if (score <= 60) suspected++;
+                else flagged++;
+                
+                const d = (s.upload_date || s.date || '').split(' ')[0];
+                if (d) {
+                    datesMap[d] = (datesMap[d] || 0) + 1;
+                }
+            });
+            
+            const sortedDates = Object.keys(datesMap).sort().slice(-5);
+            const barLabels = sortedDates.length ? sortedDates : ['No Data'];
+            const barData = sortedDates.length ? sortedDates.map(d => datesMap[d]) : [0];
+            
             const ctxPie = document.getElementById('pieChart').getContext('2d');
-            new Chart(ctxPie, {
+            if (pieChartInstance) pieChartInstance.destroy();
+            pieChartInstance = new Chart(ctxPie, {
                 type: 'doughnut',
                 data: {
                     labels: ['Safe', 'Suspected', 'Flagged'],
                     datasets: [{
-                        data: [70, 20, 10],
+                        data: [safe, suspected, flagged],
                         backgroundColor: ['#10B981', '#F59E0B', '#EF4444'],
                         borderWidth: 0
                     }]
@@ -407,25 +891,28 @@
             });
 
             const ctxBar = document.getElementById('barChart').getContext('2d');
-            new Chart(ctxBar, {
+            if (barChartInstance) barChartInstance.destroy();
+            barChartInstance = new Chart(ctxBar, {
                 type: 'bar',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+                    labels: barLabels.map(d => d === 'No Data' ? d : new Date(d).toLocaleDateString(undefined, {weekday:'short'}) || d),
                     datasets: [{
                         label: 'Submissions',
-                        data: [12, 19, 3, 5, 2],
+                        data: barData,
                         backgroundColor: '#10B981',
                         borderRadius: 8
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
-        });
+        }
 
         // Initialize
-        fetchTeacherData();
-        renderTimetable();
-        buildCalendar();
+        window.addEventListener('load', () => {
+            fetchTeacherData();
+            renderTimetable();
+            buildCalendar();
+        });
     </script>
 </body>
 

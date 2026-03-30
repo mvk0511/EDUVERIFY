@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduIntegrity – Smart Assignment & Integrity System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* ═══════════════════════════════════════════
+           ROOT TOKENS
+        ═══════════════════════════════════════════ */
+        :root {
+            --deep:    #0a0a14;
+            --surface: #0f0f1e;
+            --panel:   rgba(255,255,255,0.04);
+            --border:  rgba(255,255,255,0.08);
+            --accent:  #6c63ff;
+            --accent2: #a78bfa;
+            --teal:    #22d3ee;
+            --green:   #10b981;
+            --amber:   #f59e0b;
+            --red:     #ef4444;
+            --white:   #f8fafc;
+            --muted:   #94a3b8;
+            --font-display: 'Syne', sans-serif;
+            --font-body: 'DM Sans', sans-serif;
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--deep);
+            color: var(--white);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ══ PAGES ══ */
+        .page { display:none; min-height:100vh; }
+        .page.active { display:flex; }
+
+        /* ═══════════════════════════════════════════
+           LOGIN PAGE
+        ═══════════════════════════════════════════ */
+        #page-login {
+            align-items: center;
+            justify-content: center;
+            background: var(--deep);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Animated background orbs */
+        #page-login::before {
+            content:'';
+            position:absolute;
+            width:600px; height:600px;
+            border-radius:50%;
+            background: radial-gradient(circle, rgba(108,99,255,0.18) 0%, transparent 70%);
+            top:-150px; left:-150px;
+            animation: pulse 8s ease-in-out infinite alternate;
+        }
+        #page-login::after {
+            content:'';
+            position:absolute;
+            width:500px; height:500px;
+            border-radius:50%;
+            background: radial-gradient(circle, rgba(34,211,238,0.12) 0%, transparent 70%);
+            bottom:-100px; right:-100px;
+            animation: pulse 10s ease-in-out 2s infinite alternate;
+        }
+        @keyframes pulse {
+            0%   { transform: scale(1) translate(0,0); }
+            100% { transform: scale(1.15) translate(30px,20px); }
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 10;
+            width: 900px;
+            max-width: 96vw;
+            min-height: 540px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+            border: 1px solid var(--border);
+        }
+
+        /* Branding panel */
+        .login-brand {
+            background: linear-gradient(145deg, #1a1040 0%, #0f0f2e 50%, #0d1a35 100%);
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .login-brand::before {
+            content:'';
+            position:absolute;
+            inset:0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236c63ff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+        .brand-logo {
+            font-family: var(--font-display);
+            font-size: 32px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+        .brand-logo span { color: var(--accent2); }
+        .brand-tagline {
+            font-size: 15px;
+            color: var(--muted);
+            line-height: 1.7;
+            margin-bottom: 40px;
+        }
+        .brand-features { display: flex; flex-direction: column; gap: 16px; }
+        .brand-feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            color: #c4c9e8;
+        }
+        .brand-feature i {
+            width: 32px; height: 32px;
+            border-radius: 8px;
+            background: rgba(108,99,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent2);
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* Form panel */
+        .login-form-panel {
+            background: var(--surface);
+            padding: 60px 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .tab-switcher {
+            display: flex;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 36px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: var(--muted);
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 4px 16px rgba(108,99,255,0.4);
+        }
+
+        .login-form-panel h2 {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .login-form-panel .sub {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 28px;
+        }
+
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+
+        .field {
+            margin-bottom: 18px;
+        }
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+        .field input, .field select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--white);
+            font-family: var(--font-body);
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .field input:focus, .field select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(108,99,255,0.15);
+        }
+        .field input::placeholder { color: #4a5568; }
+        .field select option { background: var(--deep); }
+
+        .forgot { text-align: right; font-size: 13px; color: var(--accent2); cursor: pointer; margin-top: -10px; margin-bottom: 20px; }
+
+        .btn-primary-lg {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--accent), #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-family: var(--font-display);
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            letter-spacing: 0.02em;
+        }
+        .btn-primary-lg:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 28px rgba(108,99,255,0.45);
+        }
+
+        /* ═══════════════════════════════════════════
+           DASHBOARD SHARED
+        ═══════════════════════════════════════════ */
+        .dash-layout {
+            display: flex;
+            width: 100%;
+        }
+
+        .sidebar {
+            width: 260px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 0;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            font-family: var(--font-display);
+            font-size: 22px;
+            font-weight: 800;
+            padding: 0 28px 32px;
+            border-bottom: 1px solid var(--border);
+            letter-spacing: -0.5px;
+        }
+        .sidebar-logo span { color: var(--accent2); }
+
+        .nav-section {
+            padding: 20px 16px 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #3d4568;
+        }
+
+        .nav-links { list-style: none; padding: 0 12px; }
+        .nav-links li { margin-bottom: 4px; }
+        .nav-links a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 11px 16px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .nav-links a:hover { background: var(--panel); color: var(--white); }
+        .nav-links a.active { background: rgba(108,99,255,0.15); color: var(--accent2); }
+        .nav-links a.active .nav-icon { color: var(--accent); }
+        .nav-links a .nav-icon { width: 20px; text-align: center; font-size: 15px; }
+
+        .sidebar-bottom {
+            margin-top: auto;
+            padding: 16px 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .main { margin-left: 260px; flex: 1; padding: 32px 40px; }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 36px;
+        }
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .page-title small { font-size: 14px; font-weight: 400; color: var(--muted); display: block; margin-top: 2px; font-family: var(--font-body); }
+
+        .user-chip {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 50px;
+            padding: 8px 16px;
+            cursor: pointer;
+            position: relative;
+        }
+        .user-chip:hover { border-color: var(--accent); }
+        .avatar {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .user-name { font-size: 14px; font-weight: 600; }
+        .user-role { font-size: 11px; color: var(--muted); }
+
+        /* Cards */
+        .card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        .card-title {
+            font-family: var(--font-display);
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+        }
+        .card-title i { color: var(--accent2); }
+
+        /* Stat cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .stat-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 22px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 12px 36px rgba(0,0,0,0.3); }
+        .stat-card::before {
+            content:'';
+            position:absolute;
+            top:-20px; right:-20px;
+            width:80px; height:80px;
+            border-radius:50%;
+            opacity: 0.1;
+        }
+        .stat-card.c-purple::before { background: var(--accent); }
+        .stat-card.c-teal::before   { background: var(--teal); }
+        .stat-card.c-red::before    { background: var(--red); }
+        .stat-card.c-amber::before  { background: var(--amber); }
+        .stat-icon {
+            width: 42px; height: 42px;
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px;
+            margin-bottom: 14px;
+        }
+        .c-purple .stat-icon { background: rgba(108,99,255,0.2); color: var(--accent2); }
+        .c-teal .stat-icon   { background: rgba(34,211,238,0.15); color: var(--teal); }
+        .c-red .stat-icon    { background: rgba(239,68,68,0.15); color: var(--red); }
+        .c-amber .stat-icon  { background: rgba(245,158,11,0.15); color: var(--amber); }
+        .stat-num {
+            font-family: var(--font-display);
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .stat-label { font-size: 13px; color: var(--muted); }
+
+        /* Grid layouts */
+        .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 24px; }
+        .grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; }
+
+        /* Assignment card */
+        .asgn-card {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .asgn-card:hover { transform: translateX(4px); border-color: var(--accent); }
+        .asgn-title { font-weight: 600; font-size: 15px; margin-bottom: 5px; }
+        .asgn-meta { font-size: 13px; color: var(--muted); }
+        .timer { font-size: 13px; font-weight: 600; color: var(--amber); margin-top: 4px; }
+
+        /* Upload zone */
+        .upload-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+        .file-input { display: none; }
+        .btn-upload {
+            padding: 8px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+            color: var(--white);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .btn-upload:hover { background: rgba(108,99,255,0.2); border-color: var(--accent); }
+        .btn-submit {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--green), #059669);
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s;
+        }
+        .btn-submit:hover { transform: translateY(-1px); }
+
+        /* Table */
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th, .data-table td { padding: 12px 14px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .data-table th { color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+        /* Badges */
+        .badge {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            display: inline-block;
+        }
+        .badge.submitted { background: rgba(16,185,129,0.15); color: var(--green); border: 1px solid rgba(16,185,129,0.3); }
+        .badge.late      { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
+        .badge.flagged   { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+        .badge.pending   { background: rgba(148,163,184,0.1); color: var(--muted); border: 1px solid var(--border); }
+
+        /* Score bar */
+        .score-bar { width: 80px; height: 6px; background: var(--border); border-radius: 3px; margin-top: 5px; overflow: hidden; }
+        .score-fill { height: 100%; border-radius: 3px; transition: width 1s; }
+        .green-fill  { background: var(--green); }
+        .amber-fill  { background: var(--amber); }
+        .red-fill    { background: var(--red); }
+
+        /* Form elements (teacher) */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
+        .form-control {
+            width: 100%;
+            padding: 11px 14px;
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--white);
+            font-family: var(--font-body);
+            font-size: 14px;
+            outline: none;
+            transition: border 0.2s;
+        }
+        .form-control:focus { border-color: var(--accent); }
+        .form-control::placeholder { color: #3a4060; }
+        textarea.form-control { resize: none; }
+
+        .btn-action {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-family: var(--font-display);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-action:hover { transform: translateY(-2px); }
+        .btn-action.purple { background: linear-gradient(135deg, var(--accent), #7c3aed); color: white; box-shadow: 0 4px 16px rgba(108,99,255,0.3); }
+        .btn-action.teal   { background: rgba(34,211,238,0.15); color: var(--teal); border: 1px solid rgba(34,211,238,0.3); }
+        .btn-action.sm     { padding: 7px 12px; font-size: 12px; border-radius: 8px; }
+
+        /* Profile dropdown */
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            right: 0;
+            width: 200px;
+            background: #161626;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 16px 48px rgba(0,0,0,0.5);
+            display: none;
+            z-index: 200;
+        }
+        .dropdown-menu.show { display: block; }
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+        }
+        .dropdown-menu a:hover { background: var(--panel); color: var(--white); }
+        .dropdown-menu a.logout { color: var(--red); }
+        .dropdown-menu a.logout:hover { background: rgba(239,68,68,0.1); }
+        .dropdown-divider { height: 1px; background: var(--border); }
+
+        /* Animations */
+        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+        @keyframes slideIn { from { transform:translateX(-20px); opacity:0; } to { transform:translateX(0); opacity:1; } }
+        .animate-in { animation: fadeIn 0.5s ease forwards; }
+
+        /* Notification toast */
+        .toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #1e1e38;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            box-shadow: 0 16px 40px rgba(0,0,0,0.4);
+            z-index: 999;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast i { font-size: 18px; }
+        .toast.success i { color: var(--green); }
+        .toast.error i { color: var(--red); }
+
+        /* Empty state */
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--muted); }
+        .empty-state i { font-size: 40px; margin-bottom: 12px; opacity: 0.3; }
+        .empty-state p { font-size: 14px; }
+
+        /* Plagiarism Results UI */
+        .scan-action-bar {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;
+        }
+        .btn-scan {
+            padding: 12px 24px; border: none; border-radius: 10px; font-family: var(--font-display); font-size: 14px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s;
+            background: rgba(239, 68, 68, 0.15); color: var(--red); border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+        .btn-scan:hover:not(:disabled) { background: var(--red); color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+        .btn-scan:disabled { opacity: 0.5; cursor: not-allowed; border-color: transparent; }
+        
+        .results-summary-bar {
+            display: flex; gap: 16px; margin-bottom: 24px; padding: 16px; border-radius: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+        }
+        .summary-stat { flex: 1; text-align: center; }
+        .summary-stat .val { font-size: 24px; font-weight: 800; font-family: var(--font-display); }
+        .summary-stat .lbl { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .student-result-card {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 16px; position: relative; overflow: hidden;
+        }
+        .student-result-card.high-risk { border-color: rgba(239,68,68,0.5); box-shadow: inset 0 0 40px rgba(239,68,68,0.05); }
+        
+        .src-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+        .src-info h4 { font-size: 18px; font-weight: 700; color: var(--white); margin-bottom: 4px; }
+        .src-info p { font-size: 13px; color: var(--muted); }
+        
+        .ring-chart {
+            width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; position: relative; background: var(--panel);
+        }
+        .ring-chart::before { content: ''; position: absolute; inset: 4px; border-radius: 50%; background: var(--surface); z-index: 1; }
+        .ring-chart span { position: relative; z-index: 2; }
+        .ring-chart.clean { background: conic-gradient(var(--green) var(--p), var(--panel) var(--p)); color: var(--green); }
+        .ring-chart.suspicious { background: conic-gradient(var(--amber) var(--p), var(--panel) var(--p)); color: var(--amber); }
+        .ring-chart.high-risk { background: conic-gradient(var(--red) var(--p), var(--panel) var(--p)); color: var(--red); }
+        
+        .comparison-item { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; padding: 12px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 8px; }
+        .c-student { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+        .c-sim-bar-bg { width: 100%; height: 6px; background: var(--border); border-radius: 3px; margin: 8px 0; overflow: hidden; }
+        .c-sim-bar { height: 100%; }
+        .c-reason { font-size: 12px; color: var(--muted); font-style: italic; }
+        .c-phrase { font-family: monospace; font-size: 11px; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; color: var(--teal); border: 1px dashed var(--border); margin-top: 4px; word-break: break-all; }
+        
+        /* Radar Spinner */
+        .radar-container {
+            display: none; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; width: 100%; min-height: 400px;
+        }
+        .radar {
+            width: 120px; height: 120px; border-radius: 50%; border: 2px solid rgba(239, 68, 68, 0.2); position: relative; overflow: hidden; background: rgba(239, 68, 68, 0.05); margin-bottom: 24px; box-shadow: 0 0 30px rgba(239, 68, 68, 0.1);
+        }
+        .radar::before {
+            content: ''; position: absolute; top: 0; left: 50%; width: 50%; height: 50%; transform-origin: bottom left; background: linear-gradient(45deg, rgba(239, 68, 68, 0.8) 0%, transparent 70%); animation: radar-spin 2s linear infinite; border-bottom: 1px solid var(--red);
+        }
+        .radar-grid { position: absolute; inset: 0; border-radius: 50%; background-image: radial-gradient(rgba(239, 68, 68, 0.3) 1px, transparent 1px); background-size: 20px 20px; background-position: center; }
+        .radar-ring-1 { position: absolute; inset: 20px; border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 50%; }
+        .radar-ring-2 { position: absolute; inset: 40px; border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 50%; }
+        @keyframes radar-spin { 100% { transform: rotate(360deg); } }
+        
+        .loading-status { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--red); letter-spacing: 0.1em; margin-bottom: 8px; text-transform: uppercase; }
+        .loading-sub { font-size: 14px; color: var(--muted); }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .login-wrapper { grid-template-columns: 1fr; }
+            .login-brand { display: none; }
+            .stats-row { grid-template-columns: 1fr 1fr; }
+            .grid-2-1, .grid-1-2 { grid-template-columns: 1fr; }
+            .sidebar { width: 70px; }
+            .sidebar-logo, .nav-links a span, .nav-section { display: none; }
+            .nav-links a { justify-content: center; padding: 14px; }
+            .main { margin-left: 70px; }
+        }
+    </style>
+    <!-- PDF.js for text extraction -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';</script>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PAGE 1: LOGIN
+══════════════════════════════════════════ -->
+<div id="page-login" class="page active">
+    <div class="login-wrapper animate-in">
+        <!-- Brand side -->
+        <div class="login-brand">
+            <div class="brand-logo">Edu<span>Integrity</span></div>
+            <p class="brand-tagline">The smart platform for assignment management and academic integrity detection, built for modern classrooms.</p>
+            <div class="brand-features">
+                <div class="brand-feature">
+                    <i><i class="fas fa-shield-alt"></i></i>
+                    AI-powered plagiarism detection
+                </div>
+                <div class="brand-feature">
+                    <i><i class="fas fa-clock"></i></i>
+                    Real-time deadline tracking
+                </div>
+                <div class="brand-feature">
+                    <i><i class="fas fa-file-alt"></i></i>
+                    Seamless file submission
+                </div>
+                <div class="brand-feature">
+                    <i><i class="fas fa-chart-bar"></i></i>
+                    Comprehensive analytics
+                </div>
+            </div>
+        </div>
+
+        <!-- Form side -->
+        <div class="login-form-panel">
+            <div class="tab-switcher">
+                <button class="tab-btn active" onclick="switchTab('login')">Sign In</button>
+                <button class="tab-btn" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- Login -->
+            <div class="form-section active" id="login-section">
+                <h2>Welcome back</h2>
+                <p class="sub">Sign in to your account to continue</p>
+                <div class="field">
+                    <label>Username</label>
+                    <input type="text" id="login-user" placeholder="Enter your username">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="login-pass" placeholder="••••••••">
+                </div>
+                <p class="forgot">Forgot password?</p>
+                <div class="field" style="margin-bottom:0">
+                    <label>Sign in as</label>
+                    <select id="login-role">
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                </div>
+                <br>
+                <button class="btn-primary-lg" onclick="doLogin()">
+                    Sign In <i class="fas fa-arrow-right" style="margin-left:6px"></i>
+                </button>
+            </div>
+
+            <!-- Register -->
+            <div class="form-section" id="register-section">
+                <h2>Create account</h2>
+                <p class="sub">Join EduIntegrity today</p>
+                <div class="field">
+                    <label>Roll No / Username</label>
+                    <input type="text" placeholder="e.g. 2301CS050">
+                </div>
+                <div class="field">
+                    <label>Email Address</label>
+                    <input type="email" placeholder="your@email.com">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" placeholder="Create a strong password">
+                </div>
+                <div class="field">
+                    <label>Role</label>
+                    <select>
+                        <option value="">— Choose your role —</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                        <option value="cr">Class Representative (CR)</option>
+                    </select>
+                </div>
+                <button class="btn-primary-lg" onclick="showToast('Account registered! Please sign in.','success')">
+                    Create Account <i class="fas fa-user-plus" style="margin-left:6px"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 2: STUDENT DASHBOARD
+══════════════════════════════════════════ -->
+<div id="page-student" class="page">
+    <div class="dash-layout" style="width:100%">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-logo">Edu<span>Integrity</span></div>
+            <div class="nav-section">Main</div>
+            <ul class="nav-links">
+                <li><a class="active"><i class="fas fa-home nav-icon"></i><span>Dashboard</span></a></li>
+                <li><a><i class="fas fa-tasks nav-icon"></i><span>Assignments</span></a></li>
+                <li><a><i class="fas fa-history nav-icon"></i><span>History</span></a></li>
+            </ul>
+            <div class="nav-section">Account</div>
+            <ul class="nav-links">
+                <li><a><i class="fas fa-user-circle nav-icon"></i><span>Profile</span></a></li>
+                <li><a onclick="logout()" style="color:var(--red)"><i class="fas fa-sign-out-alt nav-icon"></i><span>Logout</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <main class="main animate-in">
+            <div class="topbar">
+                <div class="page-title">
+                    Student Dashboard
+                    <small>Welcome back, <span id="student-name-display">Rahul Sharma</span> 👋</small>
+                </div>
+                <div class="user-chip" onclick="toggleDropdown('student-dd')">
+                    <img src="https://ui-avatars.com/api/?name=RS&background=6c63ff&color=fff&bold=true" class="avatar">
+                    <div>
+                        <div class="user-name" id="student-chip-name">Rahul Sharma</div>
+                        <div class="user-role">CS | Roll No: 2301CS050</div>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size:11px;color:var(--muted);margin-left:4px"></i>
+                    <div class="dropdown-menu" id="student-dd">
+                        <a><i class="fas fa-user-circle"></i> Personal Info</a>
+                        <a><i class="fas fa-file-upload"></i> My Submissions</a>
+                        <a><i class="fas fa-book"></i> Records</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card c-purple">
+                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="stat-num">3</div>
+                    <div class="stat-label">Pending Assignments</div>
+                </div>
+                <div class="stat-card c-teal">
+                    <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <div class="stat-num">12</div>
+                    <div class="stat-label">Submitted</div>
+                </div>
+                <div class="stat-card c-amber">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-num">1</div>
+                    <div class="stat-label">Overdue</div>
+                </div>
+                <div class="stat-card c-red">
+                    <div class="stat-icon"><i class="fas fa-exclamation-circle"></i></div>
+                    <div class="stat-num">0</div>
+                    <div class="stat-label">Flagged</div>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid-2-1">
+                <!-- Pending Assignments -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-clipboard-list"></i> Pending Assignments</div>
+
+                    <div class="asgn-card">
+                        <div>
+                            <div class="asgn-title">NLP Research Paper</div>
+                            <div class="asgn-meta">Subject: CS-401 Natural Language Processing</div>
+                            <div class="asgn-meta">Due: Mar 08, 2026, 11:59 PM</div>
+                            <div class="timer" data-deadline="2026-03-08T23:59:00">Loading...</div>
+                        </div>
+                        <div class="upload-actions">
+                            <input type="file" class="file-input" id="file-1" accept=".pdf,.docx,.png,.jpg">
+                            <label for="file-1" class="btn-upload"><i class="fas fa-paperclip"></i> Choose File</label>
+                            <button class="btn-submit" onclick="submitAssignment(1, 'NLP Research Paper')"><i class="fas fa-paper-plane"></i> Submit</button>
+                        </div>
+                    </div>
+
+                    <div class="asgn-card">
+                        <div>
+                            <div class="asgn-title">Database Design Project</div>
+                            <div class="asgn-meta">Subject: CS-301 Database Systems</div>
+                            <div class="asgn-meta">Due: Mar 12, 2026, 11:59 PM</div>
+                            <div class="timer" data-deadline="2026-03-12T23:59:00">Loading...</div>
+                        </div>
+                        <div class="upload-actions">
+                            <input type="file" class="file-input" id="file-2" accept=".pdf,.docx,.png,.jpg">
+                            <label for="file-2" class="btn-upload"><i class="fas fa-paperclip"></i> Choose File</label>
+                            <button class="btn-submit" onclick="submitAssignment(2, 'Database Design Project')"><i class="fas fa-paper-plane"></i> Submit</button>
+                        </div>
+                    </div>
+
+                    <div class="asgn-card">
+                        <div>
+                            <div class="asgn-title">CNN Architecture Analysis</div>
+                            <div class="asgn-meta">Subject: CS-501 Deep Learning</div>
+                            <div class="asgn-meta">Due: Mar 15, 2026, 11:59 PM</div>
+                            <div class="timer" data-deadline="2026-03-15T23:59:00">Loading...</div>
+                        </div>
+                        <div class="upload-actions">
+                            <input type="file" class="file-input" id="file-3" accept=".pdf,.docx,.png,.jpg">
+                            <label for="file-3" class="btn-upload"><i class="fas fa-paperclip"></i> Choose File</label>
+                            <button class="btn-submit" onclick="submitAssignment(3, 'CNN Architecture Analysis')"><i class="fas fa-paper-plane"></i> Submit</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submission History -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-file-alt"></i> Submission History</div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Assignment</th>
+                                <th>Status</th>
+                                <th>Plagiarism</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-size:13px;font-weight:500">OS Lab Report</td>
+                                <td><span class="badge submitted">Submitted</span></td>
+                                <td>
+                                    <div style="font-size:12px;font-weight:700;color:var(--green)">18%</div>
+                                    <div class="score-bar"><div class="score-fill green-fill" style="width:18%"></div></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size:13px;font-weight:500">Algorithm Analysis</td>
+                                <td><span class="badge submitted">Submitted</span></td>
+                                <td>
+                                    <div style="font-size:12px;font-weight:700;color:var(--amber)">47%</div>
+                                    <div class="score-bar"><div class="score-fill amber-fill" style="width:47%"></div></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size:13px;font-weight:500">Network Topology</td>
+                                <td><span class="badge late">Late</span></td>
+                                <td>
+                                    <div style="font-size:12px;font-weight:700;color:var(--green)">22%</div>
+                                    <div class="score-bar"><div class="score-fill green-fill" style="width:22%"></div></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size:13px;font-weight:500">ML Assignment</td>
+                                <td><span class="badge flagged">Flagged</span></td>
+                                <td>
+                                    <div style="font-size:12px;font-weight:700;color:var(--red)">74%</div>
+                                    <div class="score-bar"><div class="score-fill red-fill" style="width:74%"></div></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="font-size:13px;font-weight:500">Cloud Computing</td>
+                                <td><span class="badge submitted">Submitted</span></td>
+                                <td>
+                                    <span style="font-size:12px;color:var(--muted)">Pending</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PAGE 3: TEACHER DASHBOARD
+══════════════════════════════════════════ -->
+<div id="page-teacher" class="page">
+    <div class="dash-layout" style="width:100%">
+        <!-- Sidebar -->
+        <nav class="sidebar">
+            <div class="sidebar-logo">Edu<span>Integrity</span></div>
+            <div class="nav-section">Main</div>
+            <ul class="nav-links">
+                <li><a class="active"><i class="fas fa-chart-line nav-icon"></i><span>Dashboard</span></a></li>
+                <li><a><i class="fas fa-book nav-icon"></i><span>Assignments</span></a></li>
+                <li><a><i class="fas fa-users nav-icon"></i><span>Students</span></a></li>
+                <li><a><i class="fas fa-search nav-icon"></i><span>Plagiarism</span></a></li>
+            </ul>
+            <div class="nav-section">Account</div>
+            <ul class="nav-links">
+                <li><a><i class="fas fa-user-circle nav-icon"></i><span>Profile</span></a></li>
+                <li><a onclick="logout()" style="color:var(--red)"><i class="fas fa-sign-out-alt nav-icon"></i><span>Logout</span></a></li>
+            </ul>
+        </nav>
+
+        <!-- Main -->
+        <main class="main animate-in">
+            <div class="topbar">
+                <div class="page-title">
+                    Teacher Dashboard
+                    <small>Manage assignments and track integrity</small>
+                </div>
+                <div class="user-chip" onclick="toggleDropdown('teacher-dd')">
+                    <img src="https://ui-avatars.com/api/?name=Prof&background=22d3ee&color=0a0a14&bold=true" class="avatar">
+                    <div>
+                        <div class="user-name" id="teacher-chip-name">Prof. User</div>
+                        <div class="user-role">Instructor</div>
+                    </div>
+                    <i class="fas fa-chevron-down" style="font-size:11px;color:var(--muted);margin-left:4px"></i>
+                    <div class="dropdown-menu" id="teacher-dd">
+                        <a><i class="fas fa-user-circle"></i> Profile</a>
+                        <a><i class="fas fa-cog"></i> Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-row">
+                <div class="stat-card c-purple">
+                    <div class="stat-icon"><i class="fas fa-tasks"></i></div>
+                    <div class="stat-num">7</div>
+                    <div class="stat-label">Total Assignments</div>
+                </div>
+                <div class="stat-card c-teal">
+                    <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="stat-num">42</div>
+                    <div class="stat-label">Submissions</div>
+                </div>
+                <div class="stat-card c-red">
+                    <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="stat-num">5</div>
+                    <div class="stat-label">Plagiarism Alerts</div>
+                </div>
+                <div class="stat-card c-amber">
+                    <div class="stat-icon"><i class="fas fa-search"></i></div>
+                    <div class="stat-num">3</div>
+                    <div class="stat-label">Pending Reviews</div>
+                </div>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid-1-2">
+                <!-- Create Assignment -->
+                <div class="card">
+                    <div class="card-title"><i class="fas fa-plus-circle"></i> Create Assignment</div>
+                    <div class="form-group">
+                        <label>Assignment Title</label>
+                        <input type="text" class="form-control" placeholder="E.g., NLP Research Paper" id="t-title">
+                    </div>
+                    <div class="form-group">
+                        <label>Subject / Course</label>
+                        <input type="text" class="form-control" placeholder="E.g., CS-401 Deep Learning" id="t-subject">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="form-control" rows="3" placeholder="Assignment instructions..." id="t-desc"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Deadline</label>
+                        <input type="datetime-local" class="form-control" id="t-deadline">
+                    </div>
+                    <button class="btn-action purple" onclick="publishAssignment()">
+                        <i class="fas fa-paper-plane"></i> Publish Assignment
+                    </button>
+                </div>
+
+                <!-- Submissions Table -->
+                <div class="card" id="teacher-submissions-container">
+                    <div class="card-title" style="justify-content:space-between">
+                        <span><i class="fas fa-inbox"></i> Recent Submissions</span>
+                        <div style="display:flex;gap:12px;align-items:center">
+                            <span id="scan-ready-count" style="font-size:12px;color:var(--muted);font-weight:600">0 submissions ready</span>
+                            <button id="btn-run-scan" class="btn-scan" onclick="runPlagiarismScan()" disabled>
+                                <i class="fas fa-microscope"></i> RUN PLAGIARISM SCAN
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Radar Loading State -->
+                    <div class="radar-container" id="scan-loading">
+                        <div class="radar">
+                            <div class="radar-grid"></div>
+                            <div class="radar-ring-1"></div>
+                            <div class="radar-ring-2"></div>
+                        </div>
+                        <div class="loading-status" id="scan-status-text">COLLECTING SUBMISSIONS...</div>
+                        <div class="loading-sub" id="scan-sub-text">Comparing submissions — please wait...</div>
+                    </div>
+
+                    <!-- Plagiarism Results Container -->
+                    <div id="plagiarism-results" style="display:none; margin-bottom: 30px;">
+                        <h3 style="font-family: var(--font-display); font-size: 18px; margin-bottom: 16px;">Scan Results</h3>
+                        
+                        <div class="results-summary-bar" id="results-summary-bar">
+                            <!-- Populated by JS -->
+                        </div>
+                        
+                        <div id="student-cards-container">
+                            <!-- Populated by JS -->
+                        </div>
+                        
+                        <button class="btn-action teal" onclick="closePlagiarismResults()" style="margin-top:20px">
+                            <i class="fas fa-arrow-left"></i> Back to Submissions
+                        </button>
+                        <hr style="border-color: var(--border); margin: 30px 0;">
+                    </div>
+
+                    <div style="overflow-x:auto" id="submissions-table-wrapper">
+                        <table class="data-table" id="submissions-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Title</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Score</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dynamic-submissions-body">
+                                <!-- Populated dynamically from localStorage -->
+                                <tr><td colspan="5" class="empty-state"><i class="fas fa-folder-open"></i><p>No submissions yet.</p></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+    <i class="fas fa-check-circle"></i>
+    <span id="toast-msg">Done!</span>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════ -->
+<script>
+    // ── Teacher Config ──
+    const CLAUDE_API_KEY = "YOUR-API-KEY-HERE";
+
+    // ── Generic helpers ──
+    // ── Tab switching (login page) ──
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.form-section').forEach(s => s.classList.remove('active'));
+        if(tab === 'login') {
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+            document.getElementById('login-section').classList.add('active');
+        } else {
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+            document.getElementById('register-section').classList.add('active');
+        }
+    }
+
+    // ── Login ──
+    function doLogin() {
+        const user = document.getElementById('login-user').value.trim() || 'Demo User';
+        const role = document.getElementById('login-role').value;
+        if(role === 'teacher') {
+            document.getElementById('teacher-chip-name').textContent = 'Prof. ' + user;
+            showPage('page-teacher');
+            refreshTeacherSubmissions(); // Load submissions for teacher
+            checkPersistedResults(); // Load past results if any
+        } else {
+            document.getElementById('student-name-display').textContent = user;
+            document.getElementById('student-chip-name').textContent = user;
+            document.querySelector('.user-chip img').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user)}&background=6c63ff&color=fff&bold=true`;
+            showPage('page-student');
+        }
+        showToast(`Welcome back, ${user}!`, 'success');
+    }
+
+    // ── Page switching ──
+    function showPage(id) {
+        document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+        const pg = document.getElementById(id);
+        pg.style.display = 'flex';
+        pg.classList.add('active');
+        pg.querySelectorAll('.animate-in').forEach(el => {
+            el.style.animation = 'none';
+            el.offsetHeight;
+            el.style.animation = '';
+        });
+    }
+
+    // ── Logout ──
+    function logout() {
+        showPage('page-login');
+        showToast('You have been signed out.', 'success');
+    }
+
+    // ── Dropdown toggle ──
+    function toggleDropdown(id) {
+        const dd = document.getElementById(id);
+        dd.classList.toggle('show');
+    }
+    document.addEventListener('click', function(e) {
+        if(!e.target.closest('.user-chip')) {
+            document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.remove('show'));
+        }
+    });
+
+    // ── Assignment submission (student) ──
+    async function submitAssignment(id, name) {
+        const inp = document.getElementById('file-' + id);
+        if(!inp.files.length) {
+            showToast('Please select a file first.', 'error');
+            return;
+        }
+
+        const file = inp.files[0];
+        let extractedText = "";
+
+        // UI Feedback
+        const label = inp.nextElementSibling;
+        const originalLabelHtml = label.innerHTML;
+        label.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        if (file.type === 'application/pdf') {
+            try {
+                showToast('Extracting text from PDF...', 'success');
+                const arrayBuffer = await file.arrayBuffer();
+                const pdf = await pdfjsLib.getDocument({data: arrayBuffer}).promise;
+                
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+                    const pageText = textContent.items.map(item => item.str).join(' ');
+                    extractedText += pageText + "\n";
+                }
+                
+                if (extractedText.trim().length === 0) {
+                    extractedText = prompt("Warning: Could not extract text from this PDF (it might be an image). Please paste the text manually:");
+                    if (!extractedText) {
+                        showToast('Submission cancelled. Text is required.', 'error');
+                        label.innerHTML = originalLabelHtml;
+                        return;
+                    }
+                }
+            } catch (err) {
+                console.error('PDF parsing error:', err);
+                showToast('Error extracting PDF text', 'error');
+                label.innerHTML = originalLabelHtml;
+                return;
+            }
+        } else {
+            extractedText = prompt("Warning: Unsupported file type for auto-extraction. Please paste the text manually:");
+            if (!extractedText) {
+                label.innerHTML = originalLabelHtml;
+                return;
+            }
+        }
+        
+        // Save to localStorage
+        let submissions = JSON.parse(localStorage.getItem('submissions') || '[]');
+        
+        const currentStudentName = document.getElementById('student-name-display').textContent;
+        const submissionId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        
+        const newSub = {
+            id: submissionId,
+            name: currentStudentName,
+            title: name,
+            text: extractedText,
+            timestamp: new Date().toISOString()
+        };
+        
+        submissions.push(newSub);
+        localStorage.setItem('submissions', JSON.stringify(submissions));
+
+        label.innerHTML = '<i class="fas fa-check"></i> Submitted';
+        label.style.borderColor = 'var(--green)';
+        label.style.color = 'var(--green)';
+        showToast(`"${name}" submitted successfully!`, 'success');
+    }
+
+    // File input label update
+    document.querySelectorAll('.file-input').forEach(inp => {
+        inp.addEventListener('change', function() {
+            if(this.files.length) {
+                const label = this.nextElementSibling;
+                const name = this.files[0].name.length > 16 ? this.files[0].name.substring(0,16)+'…' : this.files[0].name;
+                label.innerHTML = `<i class="fas fa-file"></i> ${name}`;
+                label.style.borderColor = 'var(--accent)';
+            }
+        });
+    });
+
+    // ── Publish assignment (teacher) ──
+    function publishAssignment() {
+        const title   = document.getElementById('t-title').value.trim();
+        const subject = document.getElementById('t-subject').value.trim();
+        if(!title || !subject) { showToast('Please fill in title and subject.', 'error'); return; }
+        showToast(`Assignment "${title}" published!`, 'success');
+        document.getElementById('t-title').value = '';
+        document.getElementById('t-subject').value = '';
+        document.getElementById('t-desc').value = '';
+    }
+
+    // ── Submissions & Plagiarism Logic ──
+    function refreshTeacherSubmissions() {
+        const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
+        const tbody = document.getElementById('dynamic-submissions-body');
+        const countSpan = document.getElementById('scan-ready-count');
+        const btnScan = document.getElementById('btn-run-scan');
+        
+        countSpan.textContent = `${subs.length} submissions ready`;
+        btnScan.disabled = subs.length < 2;
+
+        if (subs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><i class="fas fa-folder-open"></i><p>No submissions yet.</p></td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = subs.map(s => {
+            let badgeClass = "pending";
+            let badgeText = "Unchecked";
+            if (s.verdict === "CLEAN") { badgeClass = "submitted"; badgeText = `${s.score}% Safe`; }
+            else if (s.verdict === "SUSPICIOUS") { badgeClass = "late"; badgeText = `${s.score}% Suspicious`; }
+            else if (s.verdict === "HIGH RISK") { badgeClass = "flagged"; badgeText = `${s.score}% High Risk`; }
+            
+            return `<tr>
+                <td style="font-weight:500">${s.name}</td>
+                <td style="font-size:13px;color:var(--muted)">${s.title}</td>
+                <td style="font-size:12px;color:var(--muted)">${new Date(s.timestamp).toLocaleString()}</td>
+                <td><span class="badge ${badgeClass}">${badgeText}</span></td>
+                <td>
+                    ${s.score !== undefined ? `<div style="font-size:12px;font-weight:700;color:var(--${badgeClass === 'submitted' ? 'green' : badgeClass === 'late' ? 'amber' : 'red'})">${s.score}%</div>` : '-'}
+                </td>
+            </tr>`;
+        }).join('');
+    }
+
+    async function runPlagiarismScan() {
+        const subs = JSON.parse(localStorage.getItem('submissions') || '[]');
+        if (subs.length < 2) return;
+
+        // UI State: Loading
+        document.getElementById('submissions-table-wrapper').style.display = 'none';
+        document.getElementById('btn-run-scan').disabled = true;
+        document.getElementById('plagiarism-results').style.display = 'none';
+        
+        const loadingDiv = document.getElementById('scan-loading');
+        loadingDiv.style.display = 'flex';
+        const stext = document.getElementById('scan-status-text');
+        
+        try {
+            // Collecting
+            stext.textContent = "COLLECTING SUBMISSIONS...";
+            await new Promise(r => setTimeout(r, 800)); // artificial delay for effect
+
+            // Generating Prompt
+            stext.textContent = "CALLING CLAUDE AI...";
+            
+            const promptContent = `You are an academic plagiarism detection AI.
+
+Analyze ALL ${subs.length} submissions below. For each one, compare it 
+against every other and compute a similarity score.
+
+SUBMISSIONS:
+${subs.map((s, i) => `[${i+1}] ID:${s.id} | ${s.name} | "${s.title}"
+${(s.text || "").substring(0, 700)}`).join('\n\n---\n\n')}
+
+Return ONLY valid JSON. No markdown. No explanation. No preamble. Structure:
+{
+  "totalScanned": <number>,
+  "submissions": [
+    {
+      "id": <original submission id>,
+      "name": "<student name>",
+      "title": "<assignment title>",
+      "highestSimilarity": <0-100>,
+      "verdict": "<CLEAN | SUSPICIOUS | HIGH RISK>",
+      "comparisons": [
+        {
+          "againstName": "<other student>",
+          "againstTitle": "<their title>",
+          "similarity": <0-100>,
+          "matchedPhrase": "<exact short phrase found in both, or 'No significant overlap'>",
+          "explanation": "<one sentence>"
+        }
+      ]
+    }
+  ],
+  "summary": "<2 sentence overall summary>"
+}
+
+Scoring:
+0-20 = CLEAN, 21-50 = SUSPICIOUS, 51-100 = HIGH RISK
+Check for: identical sentences, paraphrased ideas, same examples, same structure.`;
+
+            // API Call
+            const response = await fetch('https://api.anthropic.com/v1/messages', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': CLAUDE_API_KEY,
+                    'anthropic-version': '2023-06-01',
+                    'anthropic-dangerous-direct-browser-access': 'true'
+                },
+                body: JSON.stringify({
+                    model: 'claude-sonnet-4-20250514',
+                    max_tokens: 4096,
+                    messages: [
+                        { role: 'user', content: promptContent }
+                    ]
+                })
+            });
+
+            stext.textContent = "PARSING RESULTS...";
+
+            if (!response.ok) {
+                const errResult = await response.json();
+                throw new Error(errResult.error?.message || response.statusText);
+            }
+
+            const rawData = await response.json();
+            const textContent = rawData.content[0].text;
+            
+            // Extract JSON from Claude response
+            const jsonStart = textContent.indexOf('{');
+            const jsonEnd = textContent.lastIndexOf('}');
+            if (jsonStart === -1 || jsonEnd === -1) throw new Error("Invalid output format from Claude");
+            
+            const resultData = JSON.parse(textContent.substring(jsonStart, jsonEnd + 1));
+
+            stext.textContent = "UPDATING RECORDS...";
+            await new Promise(r => setTimeout(r, 600));
+
+            // Persisting Results
+            localStorage.setItem('sa_lastResults', JSON.stringify(resultData));
+            
+            // Mutate submissions with new scores
+            resultData.submissions.forEach(res => {
+                const s = subs.find(sub => sub.id == res.id); // loose equality in case types differ
+                if (s) {
+                    s.score = res.highestSimilarity;
+                    s.verdict = res.verdict;
+                }
+            });
+            localStorage.setItem('submissions', JSON.stringify(subs));
+
+            // Render
+            renderPlagiarismResults(resultData);
+
+        } catch (error) {
+            console.error(error);
+            showToast(error.message || 'Scan failed', 'error');
+            closePlagiarismResults();
+        } finally {
+            loadingDiv.style.display = 'none';
+        }
+    }
+
+    function renderPlagiarismResults(data) {
+        document.getElementById('plagiarism-results').style.display = 'block';
+        document.getElementById('submissions-table-wrapper').style.display = 'none';
+        document.getElementById('btn-run-scan').disabled = false;
+
+        // 1. Summary Bar
+        let cleanC = 0, suspC = 0, highC = 0;
+        data.submissions.forEach(s => {
+            if (s.verdict === 'CLEAN') cleanC++;
+            else if (s.verdict === 'SUSPICIOUS') suspC++;
+            else highC++;
+        });
+
+        document.getElementById('results-summary-bar').innerHTML = `
+            <div class="summary-stat"><div class="val text-white">${data.totalScanned || data.submissions.length}</div><div class="lbl">Total</div></div>
+            <div class="summary-stat"><div class="val" style="color:var(--green)">${cleanC}</div><div class="lbl">Clean</div></div>
+            <div class="summary-stat"><div class="val" style="color:var(--amber)">${suspC}</div><div class="lbl">Suspicious</div></div>
+            <div class="summary-stat"><div class="val" style="color:var(--red)">${highC}</div><div class="lbl">High Risk</div></div>
+        `;
+
+        // 2. Student Cards (Sorted High to Low)
+        const sortedSubs = [...data.submissions].sort((a,b) => b.highestSimilarity - a.highestSimilarity);
+        const container = document.getElementById('student-cards-container');
+        
+        container.innerHTML = sortedSubs.map(s => {
+            const riskClass = s.verdict === 'HIGH RISK' ? 'high-risk' : s.verdict === 'SUSPICIOUS' ? 'suspicious' : 'clean';
+            const badgeClass = s.verdict === 'HIGH RISK' ? 'flagged' : s.verdict === 'SUSPICIOUS' ? 'late' : 'submitted';
+            
+            const compsHTML = (s.comparisons || []).sort((a,b) => b.similarity - a.similarity).map(c => `
+                <div class="comparison-item">
+                    <div>
+                        <div class="c-student"><i class="fas fa-arrow-right" style="color:var(--muted); font-size:10px; margin-right:4px"></i>${c.againstName}</div>
+                        <div class="c-reason">${c.explanation}</div>
+                        <div class="c-phrase">"${c.matchedPhrase}"</div>
+                    </div>
+                    <div>
+                        <div style="font-size:12px; font-weight:700; display:flex; justify-content:space-between">
+                            <span>Similarity</span>
+                            <span class="text-${c.similarity > 50 ? 'red' : c.similarity > 20 ? 'amber' : 'green'}">${c.similarity}%</span>
+                        </div>
+                        <div class="c-sim-bar-bg"><div class="c-sim-bar ${c.similarity > 50 ? 'red' : c.similarity > 20 ? 'amber' : 'green'}-fill" style="width:${c.similarity}%"></div></div>
+                    </div>
+                </div>
+            `).join('');
+
+            return `
+            <div class="student-result-card ${s.verdict === 'HIGH RISK' ? 'high-risk' : ''}">
+                <div class="src-header">
+                    <div class="src-info">
+                        <h4>${s.name}</h4>
+                        <p>${s.title}</p>
+                    </div>
+                    <div style="display:flex; gap:16px; align-items:center">
+                        <span class="badge ${badgeClass}" style="padding: 6px 14px; font-size:12px">${s.verdict === 'CLEAN' ? '✅' : s.verdict === 'SUSPICIOUS' ? '⚠️' : '🚨'} ${s.verdict}</span>
+                        <div class="ring-chart ${riskClass}" style="--p:${s.highestSimilarity}%"><span>${s.highestSimilarity}%</span></div>
+                    </div>
+                </div>
+                <div>${compsHTML}</div>
+            </div>`;
+        }).join('');
+        
+        refreshTeacherSubmissions();
+    }
+
+    function checkPersistedResults() {
+        const res = localStorage.getItem('sa_lastResults');
+        if (res) {
+            try {
+                const data = JSON.parse(res);
+                renderPlagiarismResults(data);
+            } catch(e) {}
+        } else {
+            document.getElementById('plagiarism-results').style.display = 'none';
+        }
+    }
+
+    function closePlagiarismResults() {
+        document.getElementById('plagiarism-results').style.display = 'none';
+        document.getElementById('submissions-table-wrapper').style.display = 'block';
+        refreshTeacherSubmissions();
+    }
+
+    // ── Countdown timers ──
+    function updateTimers() {
+        document.querySelectorAll('.timer').forEach(el => {
+            const deadline = new Date(el.dataset.deadline).getTime();
+            const now      = Date.now();
+            const dist     = deadline - now;
+            if(dist < 0) {
+                el.textContent = '⚠ Deadline passed';
+                el.style.color = 'var(--red)';
+                return;
+            }
+            const d = Math.floor(dist / 86400000);
+            const h = Math.floor((dist % 86400000) / 3600000);
+            const m = Math.floor((dist % 3600000) / 60000);
+            el.textContent = `⏱ ${d}d ${h}h ${m}m remaining`;
+        });
+    }
+    updateTimers();
+    setInterval(updateTimers, 60000);
+
+    // ── Toast notification ──
+    let toastTimer;
+    function showToast(msg, type='success') {
+        const t = document.getElementById('toast');
+        const ic = t.querySelector('i');
+        document.getElementById('toast-msg').textContent = msg;
+        t.className = 'toast ' + type;
+        ic.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    // Enter key on login
+    document.getElementById('login-pass').addEventListener('keydown', e => {
+        if(e.key === 'Enter') doLogin();
+    });
+
+    // Init
+    showPage('page-login');
+</script>
+</body>
+</html>
